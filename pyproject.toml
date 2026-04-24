@@ -17,15 +17,22 @@ dependencies = [
 
 [project.optional-dependencies]
 voice = [
-  # Speechmatics python client; ElevenLabs is pulled in via sovereign-agent[voice]
-  # if you choose to use it. Text-only mode needs NONE of these.
+  # Speechmatics real-time Python client (STT).
   "speechmatics-python >= 1.11.0",
+  # Rime.ai has no official Python SDK; we call the REST API directly
+  # via httpx. httpx is already transitive via openai, but declaring
+  # it here makes the dependency explicit.
+  "httpx >= 0.27.0",
 ]
 rasa = [
-  # Keeps the rasa deps out of the default install; Ex6 installs these
-  # explicitly. Rasa Pro has tight pins — resolving it alongside every
-  # other extra causes avoidable pain.
+  # Pulls in rasa_pro via sovereign-agent's own extra. Rasa Pro has
+  # strict pins; installing it alongside every other extra causes
+  # resolution pain, so it lives in its own group.
   "sovereign-agent[rasa] == 0.2.0",
+]
+# `educator` extra pulls everything — used for `make educator-validate`
+educator = [
+  "homework-pub-booking[voice,rasa]",
 ]
 
 [dependency-groups]

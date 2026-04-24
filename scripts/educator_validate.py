@@ -95,36 +95,49 @@ class _C:
         return cls._w("1", s)
 
 
-def _run(cmd: list[str], cwd: Path | None = None) -> tuple[int, str, str]:
-    proc = subprocess.run(
-        cmd,
-        capture_output=True,
-        text=True,
-        cwd=cwd or REPO,
-        timeout=120,
-    )
-    return proc.returncode, proc.stdout, proc.stderr
+def _run(cmd: list[str], cwd: Path | None = None, timeout: int = 120) -> tuple[int, str, str]:
+    try:
+        proc = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            cwd=cwd or REPO,
+            timeout=timeout,
+        )
+        return proc.returncode, proc.stdout, proc.stderr
+    except subprocess.TimeoutExpired as e:
+        # Return what we have so diagnostics can see the hang point
+        partial_stdout = (e.stdout or b"").decode("utf-8", errors="replace") if e.stdout else ""
+        partial_stderr = (e.stderr or b"").decode("utf-8", errors="replace") if e.stderr else ""
+        return 124, partial_stdout, f"TIMEOUT after {timeout}s\n{partial_stderr}"
 
 
 def backup_starter() -> None:
-    """Idempotent snapshot. Always refresh so we catch any stray edits."""
+    """Idempotent snapshot. Captures starter/, answers/, rasa_project/."""
     if BACKUP.exists():
         shutil.rmtree(BACKUP)
     BACKUP.mkdir()
     shutil.copytree(REPO / "starter", BACKUP / "starter")
     shutil.copytree(REPO / "answers", BACKUP / "answers")
+    if (REPO / "rasa_project").exists():
+        shutil.copytree(REPO / "rasa_project", BACKUP / "rasa_project")
 
 
 def restore_starter() -> None:
     """Reverse of backup_starter. Idempotent."""
     if not BACKUP.exists():
         return
-    if (REPO / "starter").exists():
-        shutil.rmtree(REPO / "starter")
-    if (REPO / "answers").exists():
-        shutil.rmtree(REPO / "answers")
-    shutil.copytree(BACKUP / "starter", REPO / "starter")
-    shutil.copytree(BACKUP / "answers", REPO / "answers")
+    for name in ("starter", "answers", "rasa_project"):
+        target = REPO / name
+        if target.exists():
+            shutil.rmtree(target)
+        backup_path = BACKUP / name
+        if backup_path.exists():
+            shutil.copytree(backup_path, target)
+    # Remove the docker-compose file the solution drops
+    compose = REPO / "docker-compose.rasa.yml"
+    if compose.exists():
+        compose.unlink()
 
 
 def apply_solution() -> int:
@@ -136,12 +149,16 @@ def apply_solution() -> int:
     return rc
 
 
-def run_scenario(name: str, module: str) -> tuple[bool, str]:
+def run_scenario(name: str, module: str, extra_args: list[str] | None = None) -> tuple[bool, str]:
     """Run one scenario module. Return (passed, summary)."""
-    rc, out, err = _run(["uv", "run", "python", "-m", module])
+    extra_args = extra_args or []
+    cmd = ["uv", "run", "python", "-m", module, *extra_args]
+    # Real-mode scenarios take longer (Docker pull, Rasa train, real LLM latency)
+    timeout = 600 if "--real" in extra_args else 120
+    rc, out, err = _run(cmd, timeout=timeout)
     if rc == 0:
         return True, f"{name}: ran cleanly"
-    tail = (out + err).strip().splitlines()[-3:]
+    tail = (out + err).strip().splitlines()[-5:]
     return False, f"{name}: exit {rc} — " + " | ".join(tail)
 
 
@@ -190,10 +207,17 @@ def main() -> int:
 
 
 def _main_impl() -> int:
+    real = "--real" in sys.argv
+
     print()
     print(_C.y("━" * 72))
     print(_C.b("  homework-pub-booking") + _C.d("  ·  ") + _C.b("educator validation harness"))
     print(_C.d(f"  repo: {REPO}"))
+    print(
+        _C.d(
+            f"  mode: {'REAL (live services, costs tokens + starts Docker)' if real else 'offline (mocks, fakes, stubs)'}"
+        )
+    )
     print(_C.y("━" * 72))
 
     if not SOLUTION.exists():
@@ -220,16 +244,25 @@ def _main_impl() -> int:
         print(f"  {_C.g('✓')} solution applied")
 
         # ── Phase 3 — run each scenario ─────────────────────────────
-        print_section("Phase 3 — running scenarios")
-        scenarios = [
-            ("ex5", "starter.edinburgh_research.run"),
-            ("ex6", "starter.rasa_half.run"),
-            ("ex7", "starter.handoff_bridge.run"),
-            # ex8 needs NEBIUS_KEY; skip in offline harness
-        ]
+        print_section(
+            "Phase 3 — running scenarios"
+            + (" (REAL mode — live services)" if real else " (offline mode)")
+        )
+        if real:
+            scenarios = [
+                ("ex5 (real Nebius)", "starter.edinburgh_research.run", ["--real"]),
+                ("ex6 (real Rasa Docker)", "starter.rasa_half.run", ["--real"]),
+                ("ex7 (real Nebius)", "starter.handoff_bridge.run", ["--real"]),
+            ]
+        else:
+            scenarios = [
+                ("ex5", "starter.edinburgh_research.run", []),
+                ("ex6", "starter.rasa_half.run", []),
+                ("ex7", "starter.handoff_bridge.run", []),
+            ]
         all_pass = True
-        for name, module in scenarios:
-            ok, summary = run_scenario(name, module)
+        for name, module, args in scenarios:
+            ok, summary = run_scenario(name, module, args)
             mark = _C.g("✓") if ok else _C.r("✗")
             print(f"  {mark} {summary}")
             if not ok:

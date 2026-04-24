@@ -467,7 +467,9 @@ def section_last_validate_log() -> Section:
             Check(
                 "last validate log",
                 ok=None,
-                detail="no log found (educator-validate hasn't been run, or logs aren't cached)",
+                detail=(
+                    f"no log at {log} — run `make educator-validate` first, then rerun diagnostics"
+                ),
             )
         )
     return s

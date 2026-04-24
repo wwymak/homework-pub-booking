@@ -163,18 +163,37 @@ educator-reset: ## [EDUCATOR] Restore starter/ and answers/ from .educator_backu
 	  echo "✗ .educator_backup/ not found. Did you ever run educator-apply-solution?"; \
 	  exit 1; \
 	fi
-	@rm -rf starter answers
+	@rm -rf starter answers rasa_project
 	@cp -r .educator_backup/starter starter
 	@cp -r .educator_backup/answers answers
-	@echo "✓ starter/ and answers/ restored from .educator_backup/"
+	@if [ -d .educator_backup/rasa_project ]; then cp -r .educator_backup/rasa_project rasa_project; fi
+	@rm -f docker-compose.rasa.yml
+	@echo "✓ starter/, answers/, rasa_project/ restored; docker-compose.rasa.yml removed"
 
 .PHONY: educator-validate
-educator-validate: ## [EDUCATOR] Back up, apply solution, run all scenarios, grade, restore
+educator-validate: ## [EDUCATOR] Back up, apply solution, run all scenarios (offline), grade, restore
 	@if [ ! -d solution ]; then \
 	  echo "✗ solution/ not found — this target is educator-only."; \
 	  exit 1; \
 	fi
 	@$(UV) run python scripts/educator_validate.py
+
+.PHONY: educator-validate-real
+educator-validate-real: ## [EDUCATOR] Like educator-validate but runs every -real scenario against live services (~$0.20)
+	@if [ ! -d solution ]; then \
+	  echo "✗ solution/ not found — this target is educator-only."; \
+	  exit 1; \
+	fi
+	@echo ""
+	@echo "⚠  This runs EVERY scenario against LIVE services:"
+	@echo "   - Ex5/Ex7: Nebius API (~\$$0.05 each)"
+	@echo "   - Ex6:     Rasa Pro container via Docker (needs RASA_PRO_LICENSE + 60-90s)"
+	@echo "   - Ex8:     Nebius Llama-3.3 for the manager persona (~\$$0.02)"
+	@echo "   Total: roughly \$$0.20 and ~3 minutes on first run."
+	@echo ""
+	@echo "   Ctrl-C in 5 seconds to abort."
+	@sleep 5
+	@$(UV) run python scripts/educator_validate.py --real
 
 .PHONY: educator-diagnostics
 educator-diagnostics: ## [EDUCATOR] Comprehensive diagnostics — paste output when asking for help

@@ -38,15 +38,18 @@ SOVEREIGN_AGENT_LLM_PLANNER_MODEL=Qwen/Qwen3-Next-80B-A3B-Thinking
 SOVEREIGN_AGENT_LLM_EXECUTOR_MODEL=Qwen/Qwen3-32B
 SOVEREIGN_AGENT_LLM_MEMORY_MODEL=meta-llama/Llama-3.3-70B-Instruct
 
+# --- OPTIONAL: Ex6 Rasa integration -----------------------------------
+# Rasa Pro developer-edition JWT license. Required when running the
+# real Rasa container (Ex6 solution). Without it, the stdlib mock
+# server is used (enough to pass HTTP-contract tests).
+# Sign up at https://rasa.com/rasa-pro-developer-edition/
+RASA_PRO_LICENSE=
+
 # --- OPTIONAL: Ex8 voice pipeline -------------------------------------
 # Only needed if you run `make ex8-voice`. Text mode needs neither.
 SPEECHMATICS_KEY=
-ELEVENLABS_API_KEY=
-
-# --- OPTIONAL: Ex6 Rasa integration -----------------------------------
-# Only needed if you point at a real Rasa container. The default mock
-# server in `make ex6` needs nothing.
-# RASA_REST_URL=http://localhost:5005/webhooks/rest/webhook
+# Rime.ai TTS — uses the Arcana model for voice output.
+RIME_API_KEY=
 """
 
 
