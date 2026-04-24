@@ -1,16 +1,20 @@
 """Ex8 — voice loop.
 
-Text mode runs stdin → manager → stdout.
-Voice mode runs mic → Speechmatics → manager → ElevenLabs → speaker.
+Text mode runs stdin → manager → stdout (already implemented).
+Voice mode runs mic → Speechmatics STT → manager → Rime Arcana TTS → speakers (YOUR TODO).
 
 The trace records EVERY utterance (both directions) as
 'voice.utterance_in' (user) and 'voice.utterance_out' (manager).
+Both modes MUST emit identical event shapes so the grader doesn't
+care which one ran.
 """
 
 from __future__ import annotations
 
-import os
-import sys
+# These imports will be used in your run_voice_mode implementation.
+# noqa: F401 silences "unused" until you implement.
+import os  # noqa: F401
+import sys  # noqa: F401
 
 from sovereign_agent.session.directory import Session
 from sovereign_agent.session.state import now_utc
@@ -19,7 +23,7 @@ from starter.voice_pipeline.manager_persona import ManagerPersona
 
 
 # ---------------------------------------------------------------------------
-# Text mode — implemented; read to learn the shape expected of voice mode
+# Text mode — implemented; read first to learn the trace-event shape
 # ---------------------------------------------------------------------------
 async def run_text_mode(session: Session, persona: ManagerPersona, max_turns: int = 6) -> None:
     """Run the conversation via stdin/stdout.
@@ -66,52 +70,69 @@ async def run_text_mode(session: Session, persona: ManagerPersona, max_turns: in
 
 
 # ---------------------------------------------------------------------------
-# Voice mode — TODO
+# Voice mode — TODO for Ex8
 # ---------------------------------------------------------------------------
 async def run_voice_mode(session: Session, persona: ManagerPersona, max_turns: int = 6) -> None:
-    """Voice mode. Falls back to text mode cleanly when speechmatics unavailable."""
-    if not os.environ.get("SPEECHMATICS_KEY"):
-        print(
-            "\u26a0  SPEECHMATICS_KEY not set. Falling back to text mode.\n"
-            "   See docs/speechmatics-setup.md to enable real voice.",
-            file=sys.stderr,
-        )
-        await run_text_mode(session, persona, max_turns=max_turns)
-        return
+    """Real voice mode: mic → Speechmatics STT → manager → Rime Arcana TTS → speakers.
 
-    try:
-        import speechmatics  # noqa: F401
-    except ImportError:
-        print(
-            "\u26a0  speechmatics-python not installed. Install the `voice` extra.\n"
-            "   Falling back to text mode.",
-            file=sys.stderr,
-        )
-        await run_text_mode(session, persona, max_turns=max_turns)
-        return
+    Before you start:
+      1. Run: make setup-voice
+         (installs speechmatics-python, sounddevice, pydub, numpy)
+      2. Check SPEECHMATICS_KEY and RIME_API_KEY are in your .env
+      3. macOS only: System Settings → Privacy & Security → Microphone
+         → grant your terminal app access
+      4. Run: make ex8-voice
 
-    print(
-        "(voice mode requires mic + network; simulating via stdin but emitting voice.* trace events)",
-        file=sys.stderr,
+    Architecture for each turn:
+        mic capture (sounddevice) ─▶ WAV bytes
+                                        │
+                         Speechmatics realtime STT (websocket)
+                                        │
+                                        ▼
+                                 user_text (transcript)
+                                        │
+                           (emit 'voice.utterance_in' trace event)
+                                        │
+                            persona.respond(user_text)
+                                        │
+                                        ▼
+                                manager_text (LLM reply)
+                                        │
+                          (emit 'voice.utterance_out' trace event)
+                                        │
+                             Rime.ai Arcana TTS (REST → mp3)
+                                        │
+                      pydub decode → sounddevice playback
+
+    Degrade gracefully. In order of preference:
+      * No SPEECHMATICS_KEY          → fall back to run_text_mode with warning
+      * speechmatics-python missing  → same, suggest `make setup-voice`
+      * No RIME_API_KEY              → STT works, manager replies printed (no audio)
+      * Mic permission denied        → clear error pointing at system settings
+
+    Key libraries (installed via `make setup-voice`):
+      - speechmatics.models, speechmatics.client — STT websocket
+      - sounddevice — mic capture + audio playback
+      - pydub — MP3 decode (Rime returns MP3; stdlib only does WAV)
+      - numpy — sample arrays
+
+    Trace events MUST match text mode's shape exactly:
+        'voice.utterance_in'  with payload {text, turn, mode: 'voice'}
+        'voice.utterance_out' with payload {text, turn, mode: 'voice'}
+
+    Step-by-step implementation order:
+      1. Preflight — check env vars and deps, fall back to text if missing
+      2. Wire STT only first. Print the transcript, call persona.respond,
+         print the reply. Skip TTS. Confirm trace events fire.
+      3. Add Rime TTS last. Decode MP3 → play audio.
+
+    Common failures are documented in docs/real-mode-failures.md.
+    """
+    raise NotImplementedError(
+        "TODO Ex8: implement run_voice_mode. See docstring above for the "
+        "architecture. Start with preflight, wire STT first (print transcripts), "
+        "add Rime TTS last."
     )
-
-    from sovereign_agent.observability.trace import append_event
-
-    for turn in range(1, max_turns + 1):
-        try:
-            user_text = input(f"[voice {turn}] you > ").strip()
-        except EOFError:
-            break
-        if not user_text:
-            continue
-        append_event(
-            session, "voice.utterance_in", {"text": user_text, "turn": turn, "mode": "voice"}
-        )
-        if user_text.lower() in ("goodbye", "cheerio", "bye"):
-            break
-        reply = persona.respond(user_text)
-        print(f"[voice {turn}] manager > {reply}")
-        append_event(session, "voice.utterance_out", {"text": reply, "turn": turn, "mode": "voice"})
 
 
 __all__ = ["run_text_mode", "run_voice_mode"]

@@ -122,30 +122,20 @@ def generate_flyer(session: Session, event_details: dict) -> ToolResult:
       venue_name, venue_address, date, time, party_size, condition,
       temperature_c, total_gbp, deposit_required_gbp
 
-    Write a self-contained HTML flyer (inline CSS, no external assets).
-    Use semantic tags: <article>, <h1>, <dl>/<dt>/<dd> for facts.
+    Write a self-contained HTML flyer (inline CSS, no external assets). Tag every key fact with data-testid="<n>" so the integrity check can parse it.
 
-    IMPORTANT — tag every key fact with data-testid="<n>" so the
-    integrity check can parse the DOM precisely. Suggested testids:
-      venue-name, date, time, party-size, condition, temperature,
-      total, deposit
-
-    Example fragment:
-        <dd data-testid="total">£{total_gbp}</dd>
+    Write a formatted HTML flyer with an H1 title, the event
+    facts, a weather summary, and the cost breakdown.
 
     Returns:
-      output: {"path": "workspace/flyer.html", "bytes_written": int,
-               "venue_name": str, "total_gbp": int, "deposit_required_gbp": int}
-      summary: "generate_flyer: wrote workspace/flyer.html (<N> bytes)"
+      output: {"path": "workspace/flyer.html", "bytes_written": int}
+      summary: "generate_flyer: wrote <path> (<N> chars)"
 
     MUST call record_tool_call(...) before returning — the integrity
     check compares the flyer's contents against earlier tool outputs.
 
     IMPORTANT: this tool MUST be registered with parallel_safe=False
     because it writes a file.
-
-    Tip: escape user-controlled strings with `from html import escape`
-    to avoid accidentally producing malformed HTML.
     """
     raise NotImplementedError("TODO 4: implement generate_flyer")
 

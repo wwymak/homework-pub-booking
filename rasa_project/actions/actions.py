@@ -1,61 +1,55 @@
-"""Rasa custom actions — reference implementation.
+"""Custom Rasa actions for the homework.
 
-ActionValidateBooking reads booking data from the UserUttered message's
-`metadata.booking` dict (which is how RasaStructuredHalf POSTs data) and
-validates it against the homework's business rules.
+This file runs inside the Rasa action-server container. It imports
+from rasa_sdk which is only available inside that environment — do
+NOT try to run this file from your homework venv.
 
-Why metadata, not slots?
-  Our caller POSTs this payload to Rasa's REST webhook:
-    {"sender": ..., "message": "/confirm_booking",
-     "metadata": {"booking": {"venue_id": ..., "party_size": 6, ...}}}
-
-  CALM's LLM command generator turns "/confirm_booking" into a
-  StartFlow(confirm_booking) command. But it does NOT read metadata
-  into slots — that's our job. This action does it explicitly.
-
-  The action also SETS the slots it read, so downstream flow steps
-  (like the "booking_reference" response template) can use them.
+ActionValidateBooking is the one you need to implement.
 """
 
 from __future__ import annotations
 
-import hashlib
 from typing import Any
 
-from rasa_sdk import Action, Tracker
-from rasa_sdk.events import SlotSet
-from rasa_sdk.executor import CollectingDispatcher
+# rasa_sdk is provided by the Rasa container, not the homework venv.
+# Your IDE may complain about these imports outside the container.
+from rasa_sdk import Action, Tracker  # type: ignore[import-not-found]
+from rasa_sdk.events import SlotSet  # type: ignore[import-not-found]
+from rasa_sdk.executor import CollectingDispatcher  # type: ignore[import-not-found]
 
+
+# Rules — see ASSIGNMENT.md §Ex6 and sample_data/catering.json.
 MAX_PARTY_SIZE_FOR_AUTO_BOOKING = 8
 MAX_DEPOSIT_FOR_AUTO_BOOKING_GBP = 300
 
 
-def _read_booking(tracker: Tracker) -> dict[str, Any]:
-    """Extract booking dict from metadata (primary) or slots (fallback)."""
-    latest = tracker.latest_message or {}
-    meta = latest.get("metadata") or {}
-    from_meta = meta.get("booking") if isinstance(meta, dict) else None
-    if isinstance(from_meta, dict):
-        return from_meta
-
-    # Fallback — assemble from slots if the caller populated them directly
-    return {
-        "venue_id": tracker.get_slot("venue_id"),
-        "date": tracker.get_slot("date"),
-        "time": tracker.get_slot("time"),
-        "party_size": tracker.get_slot("party_size"),
-        "deposit_gbp": tracker.get_slot("deposit_gbp"),
-    }
-
-
 class ActionValidateBooking(Action):
-    """Validate the proposed booking against policy rules.
+    """Validate the proposed booking. Returns one of:
 
-    Rules:
-      * party_size > 8         → reject ("party_too_large")
-      * deposit_gbp > 300      → reject ("deposit_too_high")
-      * missing required field → reject ("missing_<field>")
-      * otherwise              → success, set booking_reference
+    * Success: SlotSet("validation_error", None), plus a booking_reference.
+    * Rejection: SlotSet("validation_error", "<reason>").
+
+    The reason string is the one propagated to the user AND back to
+    RasaStructuredHalf via the response message.
+
+    Rules (for convenience):
+      * party_size > 8            → reject with "party_too_large"
+      * deposit_gbp > 300         → reject with "deposit_too_high"
+      * missing required field    → reject with "missing_<field>"
+      * otherwise                 → success
+
+    IMPORTANT — read booking data from metadata, not slots:
+
+        latest = tracker.latest_message or {}
+        meta = latest.get("metadata") or {}
+        booking = meta.get("booking") or {}
+        venue_id = booking.get("venue_id")
+        ...
+
+    CALM's LLM command generator starts the flow from /confirm_booking
+    but does NOT automatically read metadata into slots. That's your
+    job. Set the slots yourself at the end so downstream responses
+    can interpolate {venue_id}, {booking_reference}, etc.
     """
 
     def name(self) -> str:
@@ -67,70 +61,31 @@ class ActionValidateBooking(Action):
         tracker: Tracker,
         domain: dict[str, Any],
     ) -> list[dict[str, Any]]:
-        booking = _read_booking(tracker)
+        # Slots are pulled from the tracker. See domain.yml for the schema.
+        party_size = tracker.get_slot("party_size")
+        deposit_gbp = tracker.get_slot("deposit_gbp")
+        venue_id = tracker.get_slot("venue_id")
+        date = tracker.get_slot("date")
+        time = tracker.get_slot("time")
 
-        venue_id = booking.get("venue_id")
-        date = booking.get("date")
-        time_slot = booking.get("time")
-        party_size = booking.get("party_size")
-        deposit_gbp = booking.get("deposit_gbp", 0)
+        # TODO: validate each field per the rules above and set the
+        # validation_error slot accordingly.
+        #
+        # Use SlotSet("validation_error", "<reason>") for a rejection,
+        # or SlotSet("validation_error", None) + SlotSet("booking_reference", "BK-...")
+        # for a success.
+        #
+        # Example happy path:
+        #   import hashlib
+        #   ref = "BK-" + hashlib.sha1(
+        #       f"{venue_id}|{date}|{time}|{party_size}".encode()
+        #   ).hexdigest()[:8].upper()
+        #   return [
+        #       SlotSet("validation_error", None),
+        #       SlotSet("booking_reference", ref),
+        #   ]
 
-        # All the slot-sets we'll emit — start with populating from metadata
-        # so downstream responses can reference {venue_id}, {party_size}, etc.
-        # Cast to the types domain.yml declares so Rasa doesn't reject.
-        def _to_float(v: Any) -> float | None:
-            if v is None or v == "":
-                return None
-            try:
-                return float(v)
-            except (TypeError, ValueError):
-                return None
-
-        slot_events: list[dict[str, Any]] = [
-            SlotSet("venue_id", str(venue_id) if venue_id is not None else None),
-            SlotSet("date", str(date) if date is not None else None),
-            SlotSet("time", str(time_slot) if time_slot is not None else None),
-            SlotSet("party_size", _to_float(party_size)),
-            SlotSet("deposit_gbp", _to_float(deposit_gbp)),
-        ]
-
-        # Required-field check
-        for field_name, value in [
-            ("venue_id", venue_id),
-            ("date", date),
-            ("time", time_slot),
-            ("party_size", party_size),
-        ]:
-            if value is None or value == "":
-                return slot_events + [SlotSet("validation_error", f"missing_{field_name}")]
-
-        # Cast numeric fields (they may arrive as strings from handoff JSON)
-        try:
-            party_int = int(float(party_size))
-        except (TypeError, ValueError):
-            return slot_events + [SlotSet("validation_error", "invalid_party_size")]
-
-        try:
-            deposit_int = int(float(deposit_gbp)) if deposit_gbp is not None else 0
-        except (TypeError, ValueError):
-            return slot_events + [SlotSet("validation_error", "invalid_deposit")]
-
-        # Rule checks
-        if party_int > MAX_PARTY_SIZE_FOR_AUTO_BOOKING:
-            return slot_events + [SlotSet("validation_error", "party_too_large")]
-
-        if deposit_int > MAX_DEPOSIT_FOR_AUTO_BOOKING_GBP:
-            return slot_events + [SlotSet("validation_error", "deposit_too_high")]
-
-        # Success — generate a deterministic booking reference
-        ref = (
-            "BK-"
-            + hashlib.sha1(f"{venue_id}|{date}|{time_slot}|{party_int}".encode())
-            .hexdigest()[:8]
-            .upper()
+        raise NotImplementedError(
+            "TODO Ex6: implement ActionValidateBooking.run per the rules in "
+            "the class docstring and in ASSIGNMENT.md §Ex6."
         )
-
-        return slot_events + [
-            SlotSet("validation_error", None),
-            SlotSet("booking_reference", ref),
-        ]

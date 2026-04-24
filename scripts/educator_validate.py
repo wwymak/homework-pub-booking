@@ -344,10 +344,12 @@ def _main_impl() -> int:
                 ("ex7", "starter.handoff_bridge.run", []),
             ]
         all_pass = True
+        scenario_results: list[tuple[str, bool, str]] = []
         for name, module, args in scenarios:
             ok, summary = run_scenario(name, module, args)
-            mark = _C.g("✓") if ok else _C.r("✗")
+            mark = _C.g("✓") if ok else (_C.y("⚠") if real else _C.r("✗"))
             print(f"  {mark} {summary}")
+            scenario_results.append((name, ok, summary))
             if not ok:
                 all_pass = False
 
@@ -362,27 +364,60 @@ def _main_impl() -> int:
         # ── Phase 4 — run grader ─────────────────────────────────────
         print_section("Phase 4 — running grader against solution-applied tree")
         earned, possible, _output = run_grader()
-        local_max = 46  # Mechanical(27) + Behavioural(19). Reasoning not gradeable locally.
+        local_max = 46
         print(f"  local grader score: {earned} / {local_max} (excluding 30pt Reasoning layer)")
 
-        # Threshold: 42+/46 is "ready to ship"; 40-41 is borderline; <40 is broken.
-        if earned >= local_max - 2:
-            verdict = _C.g("✓ homework ready to ship")
-            verdict_rc = 0
-        elif earned >= local_max - 6:
-            verdict = _C.y("⚠ homework mostly working; investigate gaps")
-            verdict_rc = 0
-        else:
-            verdict = _C.r("✗ homework has real problems — investigate before cohort release")
-            verdict_rc = 1
-
+        # ── Verdict ──────────────────────────────────────────────────
+        # OFFLINE mode: strict pass/fail. Deterministic, must be green before ship.
+        # REAL mode:    DIAGNOSTIC. Real LLMs spiral, real services glitch — that's
+        #               data, not a build failure. Always exits 0 so the educator
+        #               can review the full report.
         print()
         print(_C.y("━" * 72))
-        print(f"  {verdict}")
-        print(_C.y("━" * 72))
 
-        if not all_pass:
-            verdict_rc = 1
+        if real:
+            # Diagnostic mode — always green-exit
+            n_pass = sum(1 for _, ok, _ in scenario_results if ok) + (1 if voice_impl else 0)
+            n_total = len(scenario_results) + 1
+            print(_C.b(f"  🔬 REAL-mode diagnostic: {n_pass}/{n_total} scenarios clean"))
+            print()
+            print(_C.d("     This is a DIAGNOSTIC run, not a pass/fail check. Real LLMs and"))
+            print(_C.d("     services behave nondeterministically — Qwen spirals, Rasa caches"))
+            print(_C.d("     stale code, voice SDKs glitch. These are teaching moments for"))
+            print(_C.d("     students, not bugs to suppress."))
+            print()
+            failures = [(name, summary) for name, ok, summary in scenario_results if not ok]
+            if failures:
+                print(_C.b("     Failures this run:"))
+                for fname, fsummary in failures:
+                    short = fsummary.split(" — ", 1)[-1][:90]
+                    print(f"       {_C.y('•')} {fname}: {short}")
+                print()
+                print(_C.d("     For every known real-mode failure mode, see:"))
+                print(_C.d("       docs/real-mode-failures.md"))
+            else:
+                print(
+                    _C.g(
+                        "     All real scenarios completed this run. (Run again; results may vary.)"
+                    )
+                )
+            verdict_rc = 0  # always succeed in diagnostic mode
+        else:
+            # Offline mode — strict
+            if earned >= local_max - 2 and all_pass:
+                verdict = _C.g("✓ homework ready to ship")
+                verdict_rc = 0
+            elif earned >= local_max - 6:
+                verdict = _C.y("⚠ homework mostly working; investigate gaps")
+                verdict_rc = 0
+            else:
+                verdict = _C.r("✗ homework has real problems — investigate before cohort release")
+                verdict_rc = 1
+            print(f"  {verdict}")
+            if not all_pass:
+                verdict_rc = 1
+
+        print(_C.y("━" * 72))
 
     finally:
         # ── Phase 5 — restore ────────────────────────────────────────

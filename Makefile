@@ -1,14 +1,7 @@
 # homework-pub-booking — student-facing commands.
 #
-# The critical five (in order of use):
-#   make setup         install everything, create .env
-#   make verify        prove the environment works end-to-end
-#   make test          run public tests
-#   make check-submit  run local grader (NOT the final grade)
-#   make help          list all targets with descriptions
-#
-# Per-exercise targets follow. They all run in offline mode unless
-# suffixed with -real, in which case they hit Nebius (burns tokens).
+# Run `make` (no args) or `make help` to see the structured workflow.
+# Run `make next` to get the exact next command to run based on repo state.
 
 PY := python3
 UV := uv
@@ -22,15 +15,97 @@ ifneq (,$(wildcard .env))
     export
 endif
 
+# ── Terminal colours ──────────────────────────────────────────────────
+# Uses tput if available; falls back to empty strings if not.
+GREEN   := $(shell tput -Txterm setaf 2 2>/dev/null)
+YELLOW  := $(shell tput -Txterm setaf 3 2>/dev/null)
+BLUE    := $(shell tput -Txterm setaf 4 2>/dev/null)
+MAGENTA := $(shell tput -Txterm setaf 5 2>/dev/null)
+CYAN    := $(shell tput -Txterm setaf 6 2>/dev/null)
+RED     := $(shell tput -Txterm setaf 1 2>/dev/null)
+BOLD    := $(shell tput -Txterm bold 2>/dev/null)
+DIM     := $(shell tput -Txterm dim 2>/dev/null)
+RESET   := $(shell tput -Txterm sgr0 2>/dev/null)
+
 .DEFAULT_GOAL := help
 
-# ─── help ───────────────────────────────────────────────────────────────
+# ─── help — the main navigation ────────────────────────────────────────
 
 .PHONY: help
-help: ## Show this help message
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make <target>\n\nTargets:\n"} \
-	/^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
+help: ## Structured help — your actual starting point
+	@echo ''
+	@echo '${BOLD}${MAGENTA}🍺 homework-pub-booking${RESET} — build an AI agent that books a pub'
+	@echo ''
+	@echo '${DIM}Run ${RESET}${CYAN}make next${RESET}${DIM} any time — it tells you exactly what to do based on your repo state.${RESET}'
+	@echo ''
+	@echo '${YELLOW}${BOLD}🚀 FIRST-TIME SETUP${RESET} ${DIM}(do these once, in order)${RESET}'
+	@echo '  ${GREEN}1.${RESET} ${CYAN}make setup${RESET}              install Python deps + create .env'
+	@echo '  ${GREEN}2.${RESET} ${DIM}edit .env${RESET}                 set NEBIUS_KEY (minimum) — get one at tokenfactory.nebius.com'
+	@echo '  ${GREEN}3.${RESET} ${CYAN}make verify${RESET}             probe Nebius with one cheap LLM call'
+	@echo ''
+	@echo '${YELLOW}${BOLD}📚 YOUR DAILY LOOP${RESET} ${DIM}(while implementing)${RESET}'
+	@echo '  ${CYAN}make test${RESET}                    run public tests (skips → fails when TODOs unimplemented)'
+	@echo '  ${CYAN}make check-submit${RESET}            run the local grader (advisory; CI is authoritative)'
+	@echo '  ${CYAN}make narrate-latest${RESET}          narrate the most recent session in plain English'
+	@echo '  ${CYAN}make logs${RESET}                    print the path to your most recent session'
+	@echo ''
+	@echo '${YELLOW}${BOLD}🎯 EXERCISES${RESET} ${DIM}(all have offline + -real variants)${RESET}'
+	@echo '  ${GREEN}Ex5${RESET}  — Edinburgh research (loop half + 4 tools)'
+	@echo '      ${CYAN}make ex5${RESET}                 offline (scripted LLM)'
+	@echo '      ${CYAN}make ex5-real${RESET}            real Nebius (~£0.01, may spiral — see docs/real-mode-failures.md)'
+	@echo ''
+	@echo '  ${GREEN}Ex6${RESET}  — Rasa structured half (THREE TERMINALS) ${DIM}→ make ex6-help for the recipe${RESET}'
+	@echo '      ${CYAN}make ex6${RESET}                 offline (stdlib mock, no setup)'
+	@echo '      ${CYAN}make ex6-real${RESET}            real Rasa (needs setup-rasa + 3 terminals)'
+	@echo '      ${CYAN}make ex6-auto${RESET}            one-terminal convenience (hides the lesson)'
+	@echo ''
+	@echo '  ${GREEN}Ex7${RESET}  — Handoff bridge (loop ↔ structured round-trip)'
+	@echo '      ${CYAN}make ex7${RESET}                 offline scripted round-trip'
+	@echo '      ${CYAN}make ex7-real${RESET}            real LLM in the loop'
+	@echo ''
+	@echo '  ${GREEN}Ex8${RESET}  — Voice pipeline ${DIM}(bonus)${RESET}'
+	@echo '      ${CYAN}make ex8-text${RESET}            text mode (free, no mic)'
+	@echo '      ${CYAN}make ex8-voice${RESET}           real Speechmatics + Rime (needs setup-voice + mic)'
+	@echo ''
+	@echo '${YELLOW}${BOLD}🔧 OPTIONAL INSTALLS${RESET} ${DIM}(install only when you reach that exercise)${RESET}'
+	@echo '  ${CYAN}make setup-rasa${RESET}              rasa-pro for Ex6 (~400MB, ~2min)'
+	@echo '  ${CYAN}make setup-voice${RESET}             speechmatics + sounddevice + pydub for Ex8 voice'
+	@echo ''
+	@echo '${YELLOW}${BOLD}🎭 RASA (Ex6 ONLY)${RESET} ${DIM}three terminals — read docs/rasa-setup.md first${RESET}'
+	@echo '  ${DIM}Terminal 1:${RESET} ${CYAN}make rasa-actions${RESET}      action server on :5055'
+	@echo '  ${DIM}Terminal 2:${RESET} ${CYAN}make rasa-serve${RESET}        Rasa server on :5005 (trains if needed)'
+	@echo '  ${DIM}Terminal 3:${RESET} ${CYAN}make ex6-real${RESET}          the scenario'
+	@echo '  ${DIM}Reset:${RESET}     ${CYAN}make rasa-clean${RESET}        wipe trained model + cache'
+	@echo '  ${DIM}Help:${RESET}      ${CYAN}make ex6-help${RESET}          the recipe in detail'
+	@echo ''
+	@echo '${YELLOW}${BOLD}🩺 WHEN THINGS BREAK${RESET}'
+	@echo '  ${CYAN}make verify${RESET}                  one-shot env diagnostic'
+	@echo '  ${CYAN}make narrate-latest${RESET}          last session in English'
+	@echo '  ${DIM}docs/real-mode-failures.md${RESET}   catalogue of known failures + fixes'
+	@echo '  ${DIM}cat \$$(make logs)/logs/trace.jsonl${RESET}  raw source of truth'
+	@echo ''
+	@echo '${YELLOW}${BOLD}🧹 HOUSEKEEPING${RESET}'
+	@echo '  ${CYAN}make format${RESET}                  ruff format --fix'
+	@echo '  ${CYAN}make lint${RESET}                    ruff check'
+	@echo '  ${CYAN}make ci${RESET}                      everything CI runs on a PR'
+	@echo '  ${CYAN}make clean${RESET}                   delete generated session artifacts'
+	@echo '  ${CYAN}make clean-all${RESET}               full reset (deletes .venv too)'
+	@echo ''
+	@echo '${DIM}Less-used targets:${RESET} ${CYAN}make help-all${RESET} for the complete flat list (legacy).'
+	@echo ''
+
+.PHONY: help-all
+help-all: ## Show the flat list of every target (legacy)
+	@awk 'BEGIN {FS = ":.*##"; printf "\n${YELLOW}All targets (flat list):${RESET}\n\n"} \
+	/^[a-zA-Z_-]+:.*?##/ { printf "  ${CYAN}%-30s${RESET} %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 	@echo ""
+
+# ─── `make next` — state-aware guidance ─────────────────────────────────
+
+.PHONY: next
+next: ## Inspect repo state and tell you the exact next command to run
+	@$(UV) run python scripts/make_next.py 2>/dev/null || \
+	  $(PY) scripts/make_next.py
 
 # ─── setup / verify ─────────────────────────────────────────────────────
 
@@ -133,6 +208,18 @@ setup-rasa: ## Install rasa-pro + deps (needed for Ex6 tier 2 and 3)
 	@echo "   This is a one-time ~1-2 minute install."
 	@$(UV) sync --extra rasa
 	@echo "✓ rasa-pro installed. You can now run: make rasa-actions / make rasa-serve"
+
+.PHONY: setup-voice
+setup-voice: ## Install speechmatics + rime TTS + mic deps (needed for Ex8 voice mode)
+	@echo "▶ Installing voice deps (speechmatics, sounddevice, pydub)..."
+	@echo "   Requires portaudio. On macOS: brew install portaudio"
+	@$(UV) sync --extra voice
+	@echo ""
+	@echo "✓ voice deps installed. For Ex8 voice mode you still need:"
+	@echo "    - SPEECHMATICS_KEY + RIME_API_KEY in .env"
+	@echo "    - macOS: System Settings → Privacy & Security → Microphone"
+	@echo "             → grant your terminal app access"
+	@echo "    - Then: make ex8-voice"
 
 .PHONY: rasa-train
 rasa-train: ## Train the Rasa model (reruns use the cached model)
@@ -297,17 +384,21 @@ educator-validate: ## [EDUCATOR] Back up, apply solution, run all scenarios (off
 	@$(UV) run python scripts/educator_validate.py
 
 .PHONY: educator-validate-real
-educator-validate-real: ## [EDUCATOR] Like educator-validate but runs every -real scenario against live services (~$0.20)
+educator-validate-real: ## [EDUCATOR] Diagnostic run against live services (~$0.20) — reports what happened, always exits 0
 	@if [ ! -d solution ]; then \
 	  echo "✗ solution/ not found — this target is educator-only."; \
 	  exit 1; \
 	fi
 	@echo ""
-	@echo "⚠  This runs EVERY scenario against LIVE services:"
+	@echo "🔬 DIAGNOSTIC run against LIVE services:"
 	@echo "   - Ex5/Ex7: Nebius API (~\$$0.05 each)"
-	@echo "   - Ex6:     Rasa Pro (host-process, needs RASA_PRO_LICENSE + 60-90s first-train)"
-	@echo "   - Ex8:     Nebius Llama-3.3 for the manager persona (~\$$0.02)"
-	@echo "   Total: roughly \$$0.20 and ~3 minutes on first run."
+	@echo "   - Ex6:     Rasa Pro host-process (needs RASA_PRO_LICENSE + 60-90s first-train)"
+	@echo "   - Ex8:     heuristic check only (voice needs a mic; test manually)"
+	@echo "   Total: ~\$$0.10-\$$0.20 and ~3 minutes on first run."
+	@echo ""
+	@echo "   This is a DIAGNOSTIC, not pass/fail. Real LLMs/services are"
+	@echo "   nondeterministic — failures here become lessons in docs/,"
+	@echo "   not build-breaking errors."
 	@echo ""
 	@echo "   Ctrl-C in 5 seconds to abort."
 	@sleep 5
