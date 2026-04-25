@@ -420,3 +420,15 @@ educator-backup: ## [EDUCATOR] Snapshot starter/, answers/, and rasa_project/ to
 	@cp -r answers .educator_backup/answers
 	@if [ -d rasa_project ]; then cp -r rasa_project .educator_backup/rasa_project; fi
 	@echo "✓ starter/, answers/, rasa_project/ snapshotted to .educator_backup/"
+
+code-validation: ## Run formatting check (ruff), lint (ruff), typing (ty), and pre-commit hooks
+	@echo "Validate Python code..."
+	@echo "Checking formatting..."
+	uv run ruff format --check --diff -q
+
+	@echo "Performing code checks..."
+	uv run ruff check
+
+#	@echo "Checking typing..."
+#	uv run ty check . --pretty
+#	uv run pre-commit run --all-files

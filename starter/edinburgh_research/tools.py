@@ -14,10 +14,14 @@ The grader checks for:
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
+from sovereign_agent.errors import ToolError
 from sovereign_agent.session.directory import Session
 from sovereign_agent.tools.registry import ToolRegistry, ToolResult, _RegisteredTool
+
+from starter.edinburgh_research.integrity import record_tool_call
 
 _SAMPLE_DATA = Path(__file__).parent / "sample_data"
 
@@ -43,7 +47,36 @@ def venue_search(near: str, party_size: int, budget_max_gbp: int = 1000) -> Tool
     """
     # TODO 1a: load venues.json. Raise ToolError(SA_TOOL_DEPENDENCY_MISSING)
     #          if the file is absent.
-    raise NotImplementedError("TODO 1: implement venue_search")
+    if not (_SAMPLE_DATA / "venues.json").exists():
+        raise ToolError("SA_TOOL_DEPENDENCY_MISSING")
+    with open(_SAMPLE_DATA / "venues.json") as f:
+        venues = json.load(f)
+    try:
+        valid_venues = [v for v in venues if v["open_now"]]
+        valid_venues = [v for v in valid_venues if v["area"].lower().contains(near.lower())]
+        valid_venues = [v for v in valid_venues if v["seats_available_evening"] >= party_size]
+        valid_venues = [
+            v for v in valid_venues if v["hire_fee_gbp"] + v["min_spend_gbp"] <= budget_max_gbp
+        ]
+        input_args = {
+            "near": near,
+            "party_size": party_size,
+            "budget_max_gbp": budget_max_gbp,
+        }
+        output = {
+            **input_args,
+            "venues": valid_venues,
+            "count": len(valid_venues),
+        }
+
+        record_tool_call("venue_search", input_args, output)
+        return ToolResult(
+            output=output,
+            summary=f"venue_search(near={near}, party={party_size}, budget_max_gbp={budget_max_gbp}): {len(valid_venues)} result(s)",
+            success=True,
+        )
+    except Exception as e:
+        raise ToolError(f"SA_TOOL_EXECUTION_FAILED: {e}") from e
 
 
 # ---------------------------------------------------------------------------
