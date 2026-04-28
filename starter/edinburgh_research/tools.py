@@ -48,15 +48,18 @@ def venue_search(near: str, party_size: int, budget_max_gbp: int = 1000) -> Tool
     # TODO 1a: load venues.json. Raise ToolError(SA_TOOL_DEPENDENCY_MISSING)
     #          if the file is absent.
     if not (_SAMPLE_DATA / "venues.json").exists():
-        raise ToolError("SA_TOOL_DEPENDENCY_MISSING")
-    with open(_SAMPLE_DATA / "venues.json") as f:
-        venues = json.load(f)
+        raise ToolError(code="SA_TOOL_DEPENDENCY_MISSING", message="venue data unavailable")
+
     try:
-        valid_venues = [v for v in venues if v["open_now"]]
-        valid_venues = [v for v in valid_venues if v["area"].lower().contains(near.lower())]
-        valid_venues = [v for v in valid_venues if v["seats_available_evening"] >= party_size]
+        with open(_SAMPLE_DATA / "venues.json") as f:
+            venues = json.load(f)
         valid_venues = [
-            v for v in valid_venues if v["hire_fee_gbp"] + v["min_spend_gbp"] <= budget_max_gbp
+            v
+            for v in venues
+            if v["open_now"]
+            and near.lower() in v["area"].lower()
+            and v["seats_available_evening"] >= party_size
+            and v["hire_fee_gbp"] + v["min_spend_gbp"] <= budget_max_gbp
         ]
         input_args = {
             "near": near,
@@ -65,18 +68,18 @@ def venue_search(near: str, party_size: int, budget_max_gbp: int = 1000) -> Tool
         }
         output = {
             **input_args,
-            "venues": valid_venues,
+            "results": valid_venues,
             "count": len(valid_venues),
         }
 
         record_tool_call("venue_search", input_args, output)
         return ToolResult(
-            output=output,
-            summary=f"venue_search(near={near}, party={party_size}, budget_max_gbp={budget_max_gbp}): {len(valid_venues)} result(s)",
             success=True,
+            output=output,
+            summary=f"venue_search({near}, party={party_size}): {len(valid_venues)} result(s)",
         )
     except Exception as e:
-        raise ToolError(f"SA_TOOL_EXECUTION_FAILED: {e}") from e
+        raise ToolError(code="SA_TOOL_EXECUTION_FAILED", message=f"venue search error: {e}") from e
 
 
 # ---------------------------------------------------------------------------
@@ -94,7 +97,42 @@ def get_weather(city: str, date: str) -> ToolResult:
 
     MUST call record_tool_call(...) before returning.
     """
-    raise NotImplementedError("TODO 2: implement get_weather")
+    if not (_SAMPLE_DATA / "weather.json").exists():
+        raise ToolError(code="SA_TOOL_DEPENDENCY_MISSING", message="weather data unavailable")
+    try:
+        with open(_SAMPLE_DATA / "weather.json") as f:
+            weather = json.load(f)
+        input_args = {"city": city, "date": date}
+        city_key = city.lower()
+        city_data = {k.lower(): v for k, v in weather.items()}.get(city_key)
+        if city_data is None:
+            output = {"error": "city not found", **input_args}
+            record_tool_call("get_weather", input_args, output)
+            return ToolResult(
+                success=False,
+                output=output,
+                summary=f"get_weather({city}, {date}): city not found",
+                error=ToolError(code="SA_TOOL_INVALID_INPUT", message="city not found"),
+            )
+        if date not in city_data:
+            output = {"error": "date not found", **input_args}
+            record_tool_call("get_weather", input_args, output)
+            return ToolResult(
+                success=False,
+                output=output,
+                summary=f"get_weather({city}, {date}): date not found",
+                error=ToolError(code="SA_TOOL_INVALID_INPUT", message="date not found"),
+            )
+        day = city_data[date]
+        output = {**input_args, **day}
+        record_tool_call("get_weather", input_args, output)
+        return ToolResult(
+            success=True,
+            output=output,
+            summary=f"get_weather({city}, {date}): {day['condition']}, {day['temperature_c']}C",
+        )
+    except Exception as e:
+        raise ToolError(code="SA_TOOL_EXECUTION_FAILED", message=f"get_weather error: {e}") from e
 
 
 # ---------------------------------------------------------------------------
@@ -131,7 +169,80 @@ def calculate_cost(
 
     MUST call record_tool_call(...) before returning.
     """
-    raise NotImplementedError("TODO 3: implement calculate_cost")
+    if not (_SAMPLE_DATA / "catering.json").is_file():
+        raise ToolError(code="SA_TOOL_DEPENDENCY_MISSING", message="catering data unavailable")
+    if not (_SAMPLE_DATA / "venues.json").exists():
+        raise ToolError(code="SA_TOOL_DEPENDENCY_MISSING", message="venues data unavailable")
+
+    try:
+        with open(_SAMPLE_DATA / "catering.json") as f:
+            catering = json.load(f)
+        with open(_SAMPLE_DATA / "venues.json") as f:
+            venues = json.load(f)
+        input_args = {
+            "venue_id": venue_id,
+            "party_size": party_size,
+            "duration_hours": duration_hours,
+            "catering_tier": catering_tier,
+        }
+
+        venues_by_id = {v["id"]: v for v in venues}
+        venue = venues_by_id.get(venue_id)
+        if venue is None:
+            output = {**input_args, "error": "venue not found"}
+            record_tool_call("calculate_cost", input_args, output)
+            return ToolResult(
+                success=False,
+                output=output,
+                summary=f"calculate_cost({venue_id}): venue not found",
+                error=ToolError(code="SA_TOOL_INVALID_INPUT", message="venue not found"),
+            )
+
+        base_per_head = catering["base_rates_gbp_per_head"].get(catering_tier)
+        if base_per_head is None:
+            output = {**input_args, "error": "unknown catering tier"}
+            record_tool_call("calculate_cost", input_args, output)
+            return ToolResult(
+                success=False,
+                output=output,
+                summary=f"calculate_cost({venue_id}): unknown catering tier '{catering_tier}'",
+                error=ToolError(code="SA_TOOL_INVALID_INPUT", message="unknown catering tier"),
+            )
+
+        venue_mult = catering["venue_modifiers"].get(venue_id, 1)
+        subtotal = base_per_head * venue_mult * party_size * max(1, duration_hours)
+        service = subtotal * catering["service_charge_percent"] / 100
+        total = subtotal + service + venue["hire_fee_gbp"] + venue["min_spend_gbp"]
+
+        if total < 300:
+            deposit = 0
+        elif total <= 1000:
+            deposit = total * 0.20
+        else:
+            deposit = total * 0.30
+
+        subtotal = int(subtotal)
+        service = int(service)
+        total = int(total)
+        deposit = int(deposit)
+
+        output = {
+            **input_args,
+            "subtotal_gbp": subtotal,
+            "service_gbp": service,
+            "total_gbp": total,
+            "deposit_required_gbp": deposit,
+        }
+        record_tool_call("calculate_cost", input_args, output)
+        return ToolResult(
+            success=True,
+            output=output,
+            summary=f"calculate_cost({venue_id}, {party_size}): total £{total}, deposit £{deposit}",
+        )
+    except Exception as e:
+        raise ToolError(
+            code="SA_TOOL_EXECUTION_FAILED", message=f"calculate_cost error: {e}"
+        ) from e
 
 
 # ---------------------------------------------------------------------------
@@ -159,7 +270,64 @@ def generate_flyer(session: Session, event_details: dict) -> ToolResult:
     IMPORTANT: this tool MUST be registered with parallel_safe=False
     because it writes a file.
     """
-    raise NotImplementedError("TODO 4: implement generate_flyer")
+    required_keys = [
+        "venue_name",
+        "venue_address",
+        "date",
+        "time",
+        "party_size",
+        "condition",
+        "temperature_c",
+        "total_gbp",
+        "deposit_required_gbp",
+    ]
+    missing = [k for k in required_keys if k not in event_details]
+    if missing:
+        raise ToolError(
+            code="SA_TOOL_INVALID_INPUT",
+            message=f"missing event_details keys: {missing}",
+        )
+
+    d = event_details
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Event Flyer</title>
+<style>
+  body {{ font-family: Arial, sans-serif; max-width: 600px; margin: 2em auto; padding: 1em; }}
+  h1 {{ color: #2c3e50; }}
+  dl {{ display: grid; grid-template-columns: auto 1fr; gap: 0.3em 1em; }}
+  dt {{ font-weight: bold; }}
+</style>
+</head>
+<body>
+<h1 data-testid="title">{d["venue_name"]} — Event Flyer</h1>
+<dl>
+  <dt>Venue</dt><dd data-testid="venue_name">{d["venue_name"]}</dd>
+  <dt>Address</dt><dd data-testid="venue_address">{d["venue_address"]}</dd>
+  <dt>Date</dt><dd data-testid="date">{d["date"]}</dd>
+  <dt>Time</dt><dd data-testid="time">{d["time"]}</dd>
+  <dt>Party size</dt><dd data-testid="party_size">{d["party_size"]}</dd>
+  <dt>Weather</dt><dd data-testid="condition">{d["condition"]}</dd>
+  <dt>Temperature</dt><dd data-testid="temperature">{d["temperature_c"]}°C</dd>
+  <dt>Total cost</dt><dd data-testid="total">&pound;{d["total_gbp"]}</dd>
+  <dt>Deposit required</dt><dd data-testid="deposit">&pound;{d["deposit_required_gbp"]}</dd>
+</dl>
+</body>
+</html>"""
+
+    flyer_path = session.workspace_dir / "flyer.html"
+    flyer_path.parent.mkdir(parents=True, exist_ok=True)
+    flyer_path.write_text(html, encoding="utf-8")
+    bytes_written = flyer_path.stat().st_size
+
+    input_args = {"event_details": event_details}
+    output = {"path": "workspace/flyer.html", "bytes_written": bytes_written}
+    record_tool_call("generate_flyer", input_args, output)
+    return ToolResult(
+        success=True,
+        output=output,
+        summary=f"generate_flyer: wrote workspace/flyer.html ({len(html)} chars)",
+    )
 
 
 # ---------------------------------------------------------------------------
