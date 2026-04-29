@@ -242,12 +242,63 @@ async def run_scenario(real: bool) -> int:
             planner_model = executor_model = "fake"
 
         tools = build_tool_registry(session)
-        half = LoopHalf(
-            planner=DefaultPlanner(model=planner_model, client=client),
-            executor=DefaultExecutor(model=executor_model, client=client, tools=tools),  # type: ignore[arg-type]
+
+        task_description = session.session_md_path.read_text(encoding="utf-8")
+
+        tools_summary = "\n".join(f"- {t.name}: {t.description}" for t in tools.list())
+
+        planner_system = (
+            "You are the PLANNER of an always-on agent. Your job is to take a user task "
+            "and produce a small, ordered list of subgoals.\n\n"
+            "Output ONLY a JSON array (no prose, no markdown fences) with this shape:\n"
+            "  [\n"
+            '    {"id": "sg_1", "description": "...", "success_criterion": "...",\n'
+            '     "estimated_tool_calls": N, "depends_on": [], "assigned_half": "loop"},\n'
+            "    ...\n"
+            "  ]\n\n"
+            "IMPORTANT: The task description includes EXACT tool calls with specific "
+            "arguments. You MUST copy these exact tool names and arguments into each "
+            "subgoal's description verbatim. Do NOT paraphrase or generalise the "
+            "arguments. The executor model cannot see the original task — it ONLY sees "
+            "your subgoal descriptions, so every parameter value must appear in the "
+            "description field.\n\n"
+            "Example: if the task says 'venue_search(near=\"Haymarket\", party_size=6)', "
+            "the subgoal description MUST include "
+            "'call venue_search(near=\"Haymarket\", party_size=6)' — not just "
+            "'search for venues'."
         )
 
-        result = await half.run(session, {"task": "research Edinburgh venue and write flyer"})
+        executor_system = (
+            "You are the EXECUTOR of an always-on agent. You have been given one SUBGOAL "
+            "and a set of tools. Use the tools to satisfy the subgoal's success criterion, "
+            "then respond with a plain-text final answer.\n\n"
+            "CRITICAL RULES:\n"
+            "- When the subgoal specifies exact tool call arguments, use them EXACTLY "
+            "as written. Do NOT invent your own arguments or change parameter values.\n"
+            "- Be efficient. Call each tool once with the correct arguments.\n"
+            "- If a tool returns 0 results, re-read the subgoal description and check "
+            "whether you used the exact arguments specified before retrying.\n"
+            "- When the task is complete, call `complete_task`.\n"
+            "- If the subgoal requires calling `generate_flyer`, you MUST call it "
+            "before calling `complete_task`.\n"
+        )
+
+        half = LoopHalf(
+            planner=DefaultPlanner(
+                model=planner_model, client=client, system_prompt=planner_system
+            ),
+            executor=DefaultExecutor(
+                model=executor_model, client=client, tools=tools, system_prompt=executor_system
+            ),  # type: ignore[arg-type]
+        )
+
+        result = await half.run(
+            session,
+            {
+                "task": task_description,
+                "context": {"tools_summary": tools_summary},
+            },
+        )
         print(f"\nLoop half outcome: {result.next_action}")
         print(f"  summary: {result.summary}")
 
