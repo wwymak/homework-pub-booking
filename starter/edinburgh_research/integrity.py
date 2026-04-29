@@ -15,6 +15,7 @@ variations (leading £, trailing C, case differences).
 
 from __future__ import annotations
 
+import html
 import re
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -93,7 +94,7 @@ def extract_testid_facts(text: str) -> dict[str, str]:
         r'<[^>]+data-testid="([^"]+)"[^>]*>([^<]+)</[^>]+>',
         re.IGNORECASE,
     )
-    return {m.group(1): m.group(2).strip() for m in pattern.finditer(text)}
+    return {m.group(1): html.unescape(m.group(2).strip()) for m in pattern.finditer(text)}
 
 
 def fact_appears_in_log(fact: Any, log: list[ToolCallRecord] | None = None) -> bool:
@@ -123,6 +124,17 @@ def verify_dataflow(flyer_content: str) -> IntegrityResult:
     facts_to_check.extend(extract_money_facts(flyer_content))
     facts_to_check.extend(extract_temperature_facts(flyer_content))
     facts_to_check.extend(extract_condition_facts(flyer_content))
+
+    testid_facts = extract_testid_facts(flyer_content)
+    for testid, value in testid_facts.items():
+        if testid in ("title",):
+            continue
+        cleaned = re.sub(r"^[£]+", "", re.sub(r"[°Cc]+$", "", value.strip()))
+        if cleaned and not any(
+            cleaned.lower() == re.sub(r"^[£ ]+", "", re.sub(r"[°Cc ]+$", "", f)).lower()
+            for f in facts_to_check
+        ):
+            facts_to_check.append(value)
 
     # De-dupe while preserving order
     seen: set[str] = set()
