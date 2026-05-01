@@ -7,6 +7,7 @@ private suite with a live container.
 
 from __future__ import annotations
 
+import asyncio
 import datetime
 
 import pytest
@@ -199,3 +200,39 @@ def test_normalise_deposit_key_aliases() -> None:
     # No deposit key at all → default 0
     out4 = normalise_booking_payload(base)
     assert out4["metadata"]["booking"]["deposit_gbp"] == 0
+
+
+def test_ex6_rejects_party_too_small() -> None:
+    """Mock server rejects party_size < 4 with party_too_small reason."""
+    from sovereign_agent._internal.paths import example_sessions_dir
+    from sovereign_agent.session.directory import create_session
+
+    from starter.rasa_half.structured_half import RasaStructuredHalf, spawn_mock_rasa
+
+    server, _thread, mock_url = spawn_mock_rasa(port=5906)
+    try:
+        with example_sessions_dir("test-ex6-small-party", persist=False) as sessions_root:
+            session = create_session(
+                scenario="test-ex6",
+                task="Test party too small rejection",
+                sessions_dir=sessions_root,
+            )
+            half = RasaStructuredHalf(rasa_url=mock_url)
+            result = asyncio.run(
+                half.run(
+                    session,
+                    {
+                        "data": {
+                            "venue_id": "haymarket_tap",
+                            "date": "2026-04-25",
+                            "time": "19:30",
+                            "party_size": "3",
+                            "deposit": "100",
+                        }
+                    },
+                )
+            )
+        assert not result.success
+        assert "party_too_small" in result.summary
+    finally:
+        server.shutdown()

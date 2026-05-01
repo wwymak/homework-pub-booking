@@ -448,6 +448,13 @@ class _MockRasaHandler(BaseHTTPRequestHandler):
                     "custom": {"action": "rejected", "reason": "missing_party_size"},
                 }
             ]
+        elif party < 4:
+            response = [
+                {
+                    "text": "Sorry, we can't accept this booking. Reason: party_too_small",
+                    "custom": {"action": "rejected", "reason": "party_too_small"},
+                }
+            ]
         elif party > 8:
             response = [
                 {
