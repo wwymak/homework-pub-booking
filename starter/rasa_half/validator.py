@@ -74,8 +74,10 @@ def normalise_booking_payload(raw: dict) -> dict:
     party = parse_party_size(raw.get("party_size"))
 
     deposit = 0
-    if raw.get("deposit") is not None:
-        deposit = parse_currency_gbp(raw["deposit"])
+    for _alias in _DEPOSIT_ALIASES:
+        if raw.get(_alias) is not None:
+            deposit = parse_currency_gbp(raw[_alias])
+            break
 
     duration = raw.get("duration_hours", 3)
     if isinstance(duration, str) and duration.isdigit():
@@ -160,6 +162,7 @@ def _normalise_date(raw: str) -> str:
 # Helpers — provided. You may use them or write your own.
 # ---------------------------------------------------------------------------
 _GBP_PATTERN = re.compile(r"£?\s*(\d+(?:\.\d+)?)\s*(?:gbp|GBP)?", re.IGNORECASE)
+_DEPOSIT_ALIASES = ("deposit", "deposit_gbp", "deposit_required_gbp")
 
 
 def parse_currency_gbp(raw: str | int | float) -> int:

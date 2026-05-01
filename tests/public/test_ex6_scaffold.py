@@ -109,3 +109,31 @@ def test_normalise_booking_payload_produces_rasa_shape() -> None:
     assert normalisations_applied >= 3, (
         f"only {normalisations_applied}/5 normalisations applied; grader wants ≥ 3"
     )
+
+
+def test_normalise_deposit_key_aliases() -> None:
+    """Deposit must be recognized from any of the known upstream key names."""
+    from starter.rasa_half.validator import normalise_booking_payload
+
+    base = {
+        "venue_id": "Haymarket Tap",
+        "date": "2026-04-25",
+        "time": "19:30",
+        "party_size": 6,
+    }
+
+    # "deposit" key (what run.py uses)
+    out1 = normalise_booking_payload({**base, "deposit": "£500"})
+    assert out1["metadata"]["booking"]["deposit_gbp"] == 500
+
+    # "deposit_gbp" key (what Rasa action uses)
+    out2 = normalise_booking_payload({**base, "deposit_gbp": 500})
+    assert out2["metadata"]["booking"]["deposit_gbp"] == 500
+
+    # "deposit_required_gbp" key (what calculate_cost returns)
+    out3 = normalise_booking_payload({**base, "deposit_required_gbp": 500})
+    assert out3["metadata"]["booking"]["deposit_gbp"] == 500
+
+    # No deposit key at all → default 0
+    out4 = normalise_booking_payload(base)
+    assert out4["metadata"]["booking"]["deposit_gbp"] == 0
