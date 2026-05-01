@@ -15,6 +15,7 @@ The grader checks that your validator normalises at least 3 of these
 
 from __future__ import annotations
 
+import datetime
 import re
 from dataclasses import dataclass
 
@@ -49,7 +50,7 @@ class ValidationFailed(ValueError):  # noqa: N818
 # ---------------------------------------------------------------------------
 # TODO — normalise_booking_payload
 # ---------------------------------------------------------------------------
-def normalise_booking_payload(raw: dict) -> dict:
+def normalise_booking_payload(raw: dict, reference_date: datetime.date | None = None) -> dict:
     """Take a data dict from the loop half's handoff and produce a Rasa-shaped message."""
     import hashlib
 
@@ -64,7 +65,7 @@ def normalise_booking_payload(raw: dict) -> dict:
     date_raw = raw.get("date")
     if not date_raw:
         raise ValidationFailed("missing date")
-    date_iso = _normalise_date(date_raw)
+    date_iso = _normalise_date(date_raw, reference_date=reference_date)
 
     time_raw = raw.get("time")
     if not time_raw:
@@ -139,19 +140,32 @@ _MONTH_NAMES = {
 }
 
 
-def _normalise_date(raw: str) -> str:
+def _normalise_date(raw: str, reference_date: datetime.date | None = None) -> str:
     s = str(raw).strip().lower()
+    ref = reference_date or datetime.date.today()
     if s == "today":
-        return "2026-04-25"
+        return ref.isoformat()
     if s == "tomorrow":
-        return "2026-04-26"
+        return (ref + datetime.timedelta(days=1)).isoformat()
     if re.fullmatch(r"\d{4}-\d{2}-\d{2}", s):
         return s
     m = re.match(r"(\d{1,2})(?:st|nd|rd|th)?\s+(\w+)(?:\s+(\d{4}))?", s)
     if m:
         day = int(m.group(1))
         month_name = m.group(2)
-        year = int(m.group(3)) if m.group(3) else 2026
+        year = int(m.group(3)) if m.group(3) else ref.year
+        if month_name not in _MONTH_NAMES:
+            raise ValidationFailed(f"unknown month: {month_name!r}")
+        return f"{year:04d}-{_MONTH_NAMES[month_name]:02d}-{day:02d}"
+    # DD/MM/YYYY
+    if m := re.fullmatch(r"(\d{1,2})/(\d{1,2})/(\d{4})", s):
+        day, month, year = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        return f"{year:04d}-{month:02d}-{day:02d}"
+    # Month DD, YYYY (e.g., "april 25, 2026")
+    if m := re.match(r"(\w+)\s+(\d{1,2})(?:st|nd|rd|th)?,?\s*(\d{4})?", s):
+        month_name = m.group(1)
+        day = int(m.group(2))
+        year = int(m.group(3)) if m.group(3) else ref.year
         if month_name not in _MONTH_NAMES:
             raise ValidationFailed(f"unknown month: {month_name!r}")
         return f"{year:04d}-{_MONTH_NAMES[month_name]:02d}-{day:02d}"

@@ -7,6 +7,8 @@ private suite with a live container.
 
 from __future__ import annotations
 
+import datetime
+
 import pytest
 
 
@@ -109,6 +111,66 @@ def test_normalise_booking_payload_produces_rasa_shape() -> None:
     assert normalisations_applied >= 3, (
         f"only {normalisations_applied}/5 normalisations applied; grader wants ≥ 3"
     )
+
+
+def test_normalise_date_today_is_dynamic() -> None:
+    """'today' should resolve to reference_date, not a hardcoded string."""
+    from starter.rasa_half.validator import normalise_booking_payload
+
+    base = {
+        "venue_id": "haymarket_tap",
+        "date": "today",
+        "time": "19:30",
+        "party_size": 6,
+    }
+    ref = datetime.date(2026, 6, 15)
+    out = normalise_booking_payload(base, reference_date=ref)
+    assert out["metadata"]["booking"]["date"] == "2026-06-15"
+
+
+def test_normalise_date_tomorrow_is_dynamic() -> None:
+    """'tomorrow' should resolve to reference_date + 1 day."""
+    from starter.rasa_half.validator import normalise_booking_payload
+
+    base = {
+        "venue_id": "haymarket_tap",
+        "date": "tomorrow",
+        "time": "19:30",
+        "party_size": 6,
+    }
+    ref = datetime.date(2026, 6, 15)
+    out = normalise_booking_payload(base, reference_date=ref)
+    assert out["metadata"]["booking"]["date"] == "2026-06-16"
+
+
+def test_normalise_date_default_uses_real_today() -> None:
+    """When no reference_date is passed, 'today' uses datetime.date.today()."""
+    from starter.rasa_half.validator import normalise_booking_payload
+
+    base = {
+        "venue_id": "haymarket_tap",
+        "date": "today",
+        "time": "19:30",
+        "party_size": 6,
+    }
+    out = normalise_booking_payload(base)
+    assert out["metadata"]["booking"]["date"] == datetime.date.today().isoformat()
+
+
+def test_normalise_date_extra_formats() -> None:
+    """Validator handles DD/MM/YYYY and Month DD, YYYY formats."""
+    from starter.rasa_half.validator import normalise_booking_payload
+
+    base = {"venue_id": "haymarket_tap", "time": "19:30", "party_size": 6}
+
+    out1 = normalise_booking_payload({**base, "date": "25/04/2026"})
+    assert out1["metadata"]["booking"]["date"] == "2026-04-25"
+
+    out2 = normalise_booking_payload({**base, "date": "April 25, 2026"})
+    assert out2["metadata"]["booking"]["date"] == "2026-04-25"
+
+    out3 = normalise_booking_payload({**base, "date": "april 25 2026"})
+    assert out3["metadata"]["booking"]["date"] == "2026-04-25"
 
 
 def test_normalise_deposit_key_aliases() -> None:
