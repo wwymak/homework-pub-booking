@@ -28,6 +28,7 @@ from rasa_sdk.executor import CollectingDispatcher
 
 MAX_PARTY_SIZE_FOR_AUTO_BOOKING = 8
 MAX_DEPOSIT_FOR_AUTO_BOOKING_GBP = 300
+MIN_PARTY_SIZE_FOR_BOOKING = 4
 
 
 def _read_booking(tracker: Tracker) -> dict[str, Any]:
@@ -116,6 +117,9 @@ class ActionValidateBooking(Action):
             return slot_events + [SlotSet("validation_error", "invalid_deposit")]
 
         # Rule checks
+        if party_int < MIN_PARTY_SIZE_FOR_BOOKING:
+            return slot_events + [SlotSet("validation_error", "party_too_small")]
+
         if party_int > MAX_PARTY_SIZE_FOR_AUTO_BOOKING:
             return slot_events + [SlotSet("validation_error", "party_too_large")]
 
