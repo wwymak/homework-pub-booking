@@ -1,0 +1,387 @@
+# Rasa Documentation
+
+> Documentation for building conversational AI with Rasa Pro, Rasa Studio, and the Rasa platform.
+
+
+## Overview
+
+> Get started with the Rasa platform.
+
+- [Welcome to the Rasa Docs](https://rasa.com/docs/): Get started building conversational AI agents with Rasa.
+
+## Rasa Pro
+
+> Build, deploy, and customize LLM-powered assistants.
+
+- [Welcome to Rasa](https://rasa.com/docs/pro/intro/): Learn more about Rasa's approach to conversational AI Agents
+- [Rasa Tutorial](https://rasa.com/docs/pro/tutorial/): This quickstart takes you from a simple setup to a fully functional AI agent in just a few minutes.
+
+### Analyze and Improve
+
+- [Analytics](https://rasa.com/docs/pro/improve/analytics/): Analytics
+- [Observability Metrics](https://rasa.com/docs/pro/improve/observability-metrics/): Observability Metrics
+- [Tracing](https://rasa.com/docs/pro/improve/tracing/): Tracing
+
+### Build
+
+- [Assistant Memory (Slots)](https://rasa.com/docs/pro/build/assistant-memory/): Assistant Memory (Slots)
+- [Configuring Your Assistant](https://rasa.com/docs/pro/build/configuring-assistant/): Configuring Your Assistant
+- [Configuring Enterprise Search (RAG)](https://rasa.com/docs/pro/build/configuring-enterprise-search/): Configuring Enterprise Search (RAG)
+- [Writing Custom Actions](https://rasa.com/docs/pro/build/custom-actions/): Writing custom actions
+- [Integrating External Agents via A2A](https://rasa.com/docs/pro/build/integrating-external-agents/): Connect and orchestrate multiple agents using Agent-to-Agent (A2A) protocol
+- [Integrating an MCP server](https://rasa.com/docs/pro/build/mcp-integration/): Connecting to backend APIs and services via Model Context Protocol (MCP) servers
+- [Translating Your Assistant](https://rasa.com/docs/pro/build/translating-your-assistant/): Supporting your users in their preferred language helps create more engaging, accessible, and inclusive assistants.
+- [Voice Assistants](https://rasa.com/docs/pro/build/voice-assistants/): If you started building your assistant with the Rasa Developer Edition
+- [Writing Flows](https://rasa.com/docs/pro/build/writing-flows/): How to write flows in Rasa Pro
+- [Writing Responses](https://rasa.com/docs/pro/build/writing-responses/): How to write responses in Rasa
+
+### CALM with NLU
+
+- [How does Coexistence work?](https://rasa.com/docs/pro/calm-with-nlu/coexistence/): Key Terms
+- [Migrating an NLU-based assistant to CALM](https://rasa.com/docs/pro/calm-with-nlu/migrating-from-nlu/): The Coexistence feature helps you to migrate from your NLU-based assistant to the
+
+### Customize
+
+- [Assistant Tone](https://rasa.com/docs/pro/customize/assistant-tone/): Customize your assistant's tone
+- [Command Generator](https://rasa.com/docs/pro/customize/command-generator/): Customize Command Generator
+- [Enterprise Search](https://rasa.com/docs/pro/customize/enterprise-search/): Customize Enterprise Search (RAG)
+- [Fine-Tuning an LLM for Command Generation](https://rasa.com/docs/pro/customize/fine-tuning-llm/): How to fine-tune an LLM for Command Generation
+- [Customizing Patterns](https://rasa.com/docs/pro/customize/patterns/): Customizing conversation patterns
+
+### Deploy and Scale
+
+- [Setting Up CI/CD](https://rasa.com/docs/pro/deploy/ci-cd/): Setting Up CI/CD
+- [Deploying Fine-Tuned LLMs for Command Generation](https://rasa.com/docs/pro/deploy/deploy-fine-tuned-model/): This page relates to the fine-tuning recipe, which is a beta feature available starting with version 3.10.0
+- [Deploying to Kubernetes](https://rasa.com/docs/pro/deploy/deploy-kubernetes/): Deploying to Kubernetes
+- [LLM Routing](https://rasa.com/docs/pro/deploy/llm-routing/): LLM Routing
+- [Load Testing Guidelines](https://rasa.com/docs/pro/deploy/load-testing/): Information about how best to scale up your bot to support parallel user activity
+and how you can use tracing to help debug issues.
+
+- [Quick Deployment with Docker Compose](https://rasa.com/docs/pro/deploy/quick-deploy/): Use Docker Compose to quickly and cheaply deploy a Rasa CALM Chatbot to a server
+
+### Installation and Set Up
+
+- [Using Docker](https://rasa.com/docs/pro/installation/docker/): Run Rasa locally with Docker
+- [Licensing](https://rasa.com/docs/pro/installation/licensing/): License Rasa in your local environment.
+- [Get Started with Rasa](https://rasa.com/docs/pro/installation/overview/): Get Started with Rasa
+- [Using Python](https://rasa.com/docs/pro/installation/python/): Install Rasa in your local environment.
+- [Rasa MCP Tools](https://rasa.com/docs/pro/installation/rasa-mcp-tools/): Learn about and configure the Rasa MCP server for Cursor, VS Code, Claude Code, and JetBrains clients.
+- [Troubleshooting](https://rasa.com/docs/pro/installation/troubleshooting/): Troubleshooting issues with your local environment.
+
+### Test
+
+- [Evaluating Your Assistant (E2E Testing)](https://rasa.com/docs/pro/testing/evaluating-assistant/): Evaluating your assistant with E2E Testing
+- [Trying Your Assistant](https://rasa.com/docs/pro/testing/trying-assistant/): Trying Your Assistant with Inspector
+
+## Rasa Studio
+
+> No-code tool for building and managing assistants.
+
+- [Welcome to Studio](https://rasa.com/docs/studio/intro/): Learn more about Rasa's no code tool for building assistants.
+- [Your First Assistant](https://rasa.com/docs/studio/tutorial/): Rasa Studio Tutorials for CALM assistants
+
+### Analyze
+
+- [Analytics](https://rasa.com/docs/studio/analyze/analytics/): Rasa Studio - Monitor and improve your assistant's performance
+- [How to Annotate your Conversations](https://rasa.com/docs/studio/analyze/annotation/): Intent and Entity Annotation guide
+- [Conversation Review](https://rasa.com/docs/studio/analyze/conversation-review/): Rasa Studio - Conversation Review for NLU and CALM Assistants
+
+### Build
+
+- [How to Create a Custom Action](https://rasa.com/docs/studio/build/actions/create-a-custom-action/): Learn how to enable your assistant to perform actions in Rasa Studio
+- [Introduction to Actions](https://rasa.com/docs/studio/build/actions/introduction/): Learn how to enable your assistant to perform actions in Rasa Studio
+- [Local Setup for Custom Actions](https://rasa.com/docs/studio/build/actions/local-testing/): Learn how to test your actions locally in Rasa Studio
+- [Buttons and Links](https://rasa.com/docs/studio/build/content-management/buttons-and-links/): View, create, edit and remove all your assistant's buttons and links
+- [Conversation Review](https://rasa.com/docs/studio/build/content-management/conversation-review/): Rasa Studio - Conversation Review for NLU and CALM Assistants
+- [Managing Content in Studio](https://rasa.com/docs/studio/build/content-management/introduction/): Learn how to manage content in Rasa Studio
+- [How to Manage Flows](https://rasa.com/docs/studio/build/content-management/manage-flows/): Rasa Studio Flow Builder Manage Flows
+- [How to use Intents and Entities](https://rasa.com/docs/studio/build/content-management/nlu/): View, create, edit and remove all your assistant’s intents, entities and examples
+- [Responses](https://rasa.com/docs/studio/build/content-management/responses/): View, create, edit and remove all your assistant's responses, simple or conditional
+- [Slots](https://rasa.com/docs/studio/build/content-management/slots/): View, create, edit and remove all your assistant's slots
+- [Translating Your Responses](https://rasa.com/docs/studio/build/content-management/translations/): Managing translations for your assistant in Studio.
+- [Version Control in Studio](https://rasa.com/docs/studio/build/content-management/version-control/): Rasa Studio Flow version control
+- [Flow Builder — Best practices](https://rasa.com/docs/studio/build/flow-building/best-practices/): Rasa Studio Flow Builder — Best practices
+- [How to Collect Information](https://rasa.com/docs/studio/build/flow-building/collect/): How your assistant can collect information in Studio.
+- [How to Create a Flow](https://rasa.com/docs/studio/build/flow-building/create-flows/): How to create flows with Rasa Studio
+- [Introduction to Flows](https://rasa.com/docs/studio/build/flow-building/introduction/): Rasa Studio Flow Introduction
+- [How to Link, Call and Connect Flows](https://rasa.com/docs/studio/build/flow-building/linking-flows/): Learn how to link, call and connect steps in your flows to keep your logic streamlined in Rasa Studio.
+- [How to Make Decisions](https://rasa.com/docs/studio/build/flow-building/logic/): How to use Logic and Conditions in Studio.
+- [How to Send Messages](https://rasa.com/docs/studio/build/flow-building/sending-messages/): How to write and send messages with Rasa Studio
+- [How to Set Slots](https://rasa.com/docs/studio/build/flow-building/set-slots/): Rasa Studio Flow Builder Set slots
+- [How to Edit System Flows](https://rasa.com/docs/studio/build/flow-building/system-flows/): Rasa Studio Flow Builder Start
+- [How to Trigger Flows](https://rasa.com/docs/studio/build/flow-building/trigger-flows/): Rasa Studio Flow Builder Start
+- [How to Set Up Your Assistant](https://rasa.com/docs/studio/build/set-up-your-assistant/): Create and configure your first Studio assistant.
+
+### Customize
+
+- [Customize your Assistant's Prompts](https://rasa.com/docs/studio/customize/custom-prompts/): How to enable custom prompts in Studio
+
+### Installation and Set Up
+
+- [Docker Compose Installation Guide](https://rasa.com/docs/studio/installation/installation-guides/docker-compose-guide/): Guide for installing Studio with Docker Compose
+- [Helm Installation Guide](https://rasa.com/docs/studio/installation/installation-guides/helm-guide/): Guide for installing Studio with Helm
+- [Resource Requirements](https://rasa.com/docs/studio/installation/installation-guides/resource-requirements/): Resource Requirements for Studio Pods
+- [Installation Overview](https://rasa.com/docs/studio/installation/overview/): Overview of the components required for deploying Studio
+- [Users and Roles Setup Guide](https://rasa.com/docs/studio/installation/setup-guides/authorization-guide/): Learn how to set up Studio users with Keycloak and manage their permissions
+- [Delete Assistant](https://rasa.com/docs/studio/installation/setup-guides/delete-assistant/): Learn how to delete a project.
+- [License Activation](https://rasa.com/docs/studio/installation/setup-guides/license-activation/): Guide on how to active your Rasa Studio license
+
+### Security
+
+- [Authorizing Studio Requests](https://rasa.com/docs/studio/security/authorization/): How to setup authorization for the Studio API
+- [How to Manage Studio Users](https://rasa.com/docs/studio/security/managing-users/): How to manage user access to Studio
+
+### Test
+
+- [introduction](https://rasa.com/docs/studio/test/introduction/)
+- [Train your Assistant](https://rasa.com/docs/studio/test/train-your-assistant/): How to train your assistant in Rasa Studio
+- [Try your Assistant](https://rasa.com/docs/studio/test/try-your-assistant/): Rasa Studio — Try Your Assistant
+
+## Reference
+
+> Technical reference for configuration, APIs, and primitives.
+
+- [Rasa Platform Reference](https://rasa.com/docs/reference/overview/): Comprehensive technical documentation and reference materials for building with the Rasa platform. Find detailed information about Rasa's components, APIs, configuration options, and technical specifications.
+- [Python Versions and Dependencies](https://rasa.com/docs/reference/python-versions-and-dependencies/): Supported Python versions and dependency groups for Rasa Pro
+
+### API
+
+- [Analytics Pipeline: Data structure reference](https://rasa.com/docs/reference/api/analytics-data-structure-reference/): The data structure is created by the Analytics pipeline and treated as
+- [Command Line Interface](https://rasa.com/docs/reference/api/command-line-interface/): Command line interface for Rasa. Learn how to train, test and run your machine learning-based conversational AI assistants
+- [Rasa Action Server HTTP API](https://rasa.com/docs/reference/api/pro/action-server-api/)
+- [Rasa Pro REST API](https://rasa.com/docs/reference/api/pro/http-api/)
+- [Enabling the Rasa REST API](https://rasa.com/docs/reference/api/pro/rasa-pro-rest-api/): Read about Rasa's REST API that has endpoints for conversations, training models, and configuring your bot.
+- [Rasa MCP Tools API Reference](https://rasa.com/docs/reference/api/rasa-mcp-tools/): Reference for the Rasa MCP tools available through the local Rasa MCP server.
+- [Authorization](https://rasa.com/docs/reference/api/studio/api-authorization/): Authorization for Studio API
+- [Model Download API for CI Integration](https://rasa.com/docs/reference/api/studio/ci-integration-api/): Model Download API for CI Integration
+- [Conversation API](https://rasa.com/docs/reference/api/studio/conversation-api/): Conversation API
+
+### Architecture
+
+- [Rasa Architecture](https://rasa.com/docs/reference/architecture/rasa-pro/): The diagram below provides an overview of the Rasa Architecture.
+- [Studio Architecture](https://rasa.com/docs/reference/architecture/studio/): Rasa Studio architecture
+
+### Changelogs
+
+- [Compatibility Matrix for the Rasa Platform](https://rasa.com/docs/reference/changelogs/compatibility-matrix/): Information about compatibility between Rasa Studio, Rasa Pro and Rasa Pro Services.
+
+- [Rasa Pro Change Log](https://rasa.com/docs/reference/changelogs/rasa-pro-changelog/): All notable changes to Rasa Pro will be documented in this page.
+- [Rasa Pro Version Migration Guide](https://rasa.com/docs/reference/changelogs/rasa-pro-migration-guide/): Information about changes between major versions of chatbot framework Rasa
+and how you can migrate from one version to another.
+
+- [Rasa Pro Services Change Log](https://rasa.com/docs/reference/changelogs/rasa-pro-services-changelog/): All notable changes to Rasa Pro Services will be documented in this page.
+- [Rasa SDK Change Log](https://rasa.com/docs/reference/changelogs/rasa-sdk-changelog/): The Rasa SDK changelog can be found in the Rasa SDK repository
+- [Studio Change Log](https://rasa.com/docs/reference/changelogs/studio-changelog/): Studio Change Log
+- [Studio Version Migration Guide](https://rasa.com/docs/reference/changelogs/studio-version-migration-guide/): Information about changes between major versions of Rasa Studio
+and how you can migrate from one version to another.
+
+
+### Channels
+
+- [AudioCodes Voice Stream Channel](https://rasa.com/docs/reference/channels/audiocodes-stream/): From Rasa Pro 3.12, you can stream conversation audio directly from
+- [Audiocodes VoiceAI Connect](https://rasa.com/docs/reference/channels/audiocodes-voiceai-connect/): Build a Rasa Voice Bot on Audiocodes VoiceAI Connect
+- [Cisco Webex Teams](https://rasa.com/docs/reference/channels/cisco-webex-teams/): Build a Rasa Chat Bot on Cisco Webex
+- [Custom Connectors](https://rasa.com/docs/reference/channels/custom-connectors/): Deploy and Run a Rasa Chat Bot on a custom chat interface
+- [Facebook Messenger](https://rasa.com/docs/reference/channels/facebook-messenger/): Build a Rasa Chat Bot on Facebook Messenger
+- [Genesys Cloud](https://rasa.com/docs/reference/channels/genesys-cloud-voice/): The Genesys Cloud connector is available from Rasa Pro 3.12
+- [Google Hangouts Chat](https://rasa.com/docs/reference/channels/hangouts/): Build a Rasa Chat Bot on Google Hangouts Chat
+- [Jambonz as Voice Gateway](https://rasa.com/docs/reference/channels/jambonz/): Connecting to the Jambonz Voice Gateway
+- [Jambonz Voice Stream Channel](https://rasa.com/docs/reference/channels/jambonz-stream/): From Rasa Pro 3.13, you can stream conversation audio directly from
+- [Mattermost](https://rasa.com/docs/reference/channels/mattermost/): Build a Rasa Chat Bot on Mattermost
+- [Connecting to Messaging and Voice Channels](https://rasa.com/docs/reference/channels/messaging-and-voice-channels/): Check out how to make your Rasa assistant available on platforms like Facebook Messenger, Slack, Telegram or even your very own website.
+- [Microsoft Bot Framework](https://rasa.com/docs/reference/channels/microsoft-bot-framework/): Build a Rasa Chat Bot on Microsoft Bot Framework
+- [RocketChat](https://rasa.com/docs/reference/channels/rocketchat/): Build a Rasa Chat Bot on Rocketchat
+- [Slack](https://rasa.com/docs/reference/channels/slack/): Build a Rasa Chat Bot on Slack
+- [Telegram](https://rasa.com/docs/reference/channels/telegram/): Build a Rasa Chat Bot on Telegram
+- [Twilio](https://rasa.com/docs/reference/channels/twilio/): Deploy a Rasa assistant through text message or WhatsApp via the Twilio connector
+- [Twilio Media Streams](https://rasa.com/docs/reference/channels/twilio-media-streams/): Deploy a Rasa IVR assistant via Twilio Media Streams
+- [Twilio Voice](https://rasa.com/docs/reference/channels/twilio-voice/): Deploy a Rasa IVR assistant via the Twilio Voice connector
+- [Your Own Website](https://rasa.com/docs/reference/channels/your-own-website/): Deploy and Run a Rasa Chat Bot on a Website
+
+### Configuration
+
+- [External Sub Agent](https://rasa.com/docs/reference/config/agents/external-sub-agents/): Rasa supports stateful execution of external agents via A2A protocol.
+- [Overview](https://rasa.com/docs/reference/config/agents/overview-agents/): Sub Agents are currently in beta and are available starting from Rasa 3.14.0.
+- [ReAct Sub Agent](https://rasa.com/docs/reference/config/agents/react-sub-agents/): ReAct Sub Agents are currently in beta and are available starting from Rasa 3.14.0.
+- [Coexistence Routers](https://rasa.com/docs/reference/config/components/coexistence-routers/): The coexistence of CALM and the NLU-based system depends on a routing
+- [Deprecated Components](https://rasa.com/docs/reference/config/components/deprecated-components/): SingleStepLLMCommandGenerator
+- [nlu-dense](https://rasa.com/docs/reference/config/components/example-components/custom-graph-components/nlu-dense/)
+- [nlu-meta-fallback](https://rasa.com/docs/reference/config/components/example-components/custom-graph-components/nlu-meta-fallback/)
+- [nlu-meta-intent-featurizer](https://rasa.com/docs/reference/config/components/example-components/custom-graph-components/nlu-meta-intent-featurizer/)
+- [nlu-sparse](https://rasa.com/docs/reference/config/components/example-components/custom-graph-components/nlu-sparse/)
+- [graph-component-interface](https://rasa.com/docs/reference/config/components/example-components/graph-component-interface/)
+- [nlu-component-skeleton](https://rasa.com/docs/reference/config/components/example-components/nlu-component-skeleton/)
+- [registered-component](https://rasa.com/docs/reference/config/components/example-components/registered-component/)
+- [Graph Recipe](https://rasa.com/docs/reference/config/components/graph-recipe/): Learn about Graph Recipe for Rasa.
+- [LLM Command Generators](https://rasa.com/docs/reference/config/components/llm-command-generators/): How an LLM-based Command Generator Works
+- [LLM Configuration for Rasa Pro ≥ 3.11](https://rasa.com/docs/reference/config/components/llm-configuration/): For Rasa Pro versions 3.10 and below, refer to the LLM Configuration for <=3.10 page.
+- [LLM Configuration for Rasa Pro ≤ 3.10](https://rasa.com/docs/reference/config/components/llm-configuration-before-3-10/): For Rasa Pro versions 3.11 and above, refer to the LLM Configuration for >=3.11 page.
+- [Customizing LLM-based Components](https://rasa.com/docs/reference/config/components/llm-custom/): The LLM components can be extended and modified with custom versions. This
+- [NLU Command Adapter](https://rasa.com/docs/reference/config/components/nlu-command-adapter/): How the NLUCommandAdapter Works
+- [NLU Components](https://rasa.com/docs/reference/config/components/nlu-components/): To use NLU components, you need to install the nlu dependency group:
+- [Domain](https://rasa.com/docs/reference/config/domain/): In Rasa, your domain defines the universe in which your assistant operates.
+- [Environment Variables](https://rasa.com/docs/reference/config/environment-variables/): When running Rasa, the RASA_LICENSE environment variable needs to contain
+- [Overview](https://rasa.com/docs/reference/config/overview/): Configure your Rasa Assistant.
+- [Configuring PII Management](https://rasa.com/docs/reference/config/pii-management/configuring-pii-management/): Learn how to configure PII management in Rasa, including tracker store settings, anonymization rules, and event broker configuration.
+- [PII Management Overview](https://rasa.com/docs/reference/config/pii-management/overview/): Manage personally identifiable information (PII) collected by your Rasa Assistant.
+- [PII Management Prerequisites](https://rasa.com/docs/reference/config/pii-management/prerequisites/): To use the PII management capability, you need to have the prerequisites in place.
+- [Custom Information Retrieval with Enterprise Search Policy](https://rasa.com/docs/reference/config/policies/custom-information-retrievers/): Rasa now supports Custom Information Retrievers to be used with the EnterpriseSearchPolicy. This feature allows you to integrate your own custom search systems or vector stores with Rasa.
+- [Enterprise Search Policy](https://rasa.com/docs/reference/config/policies/enterprise-search-policy/): The Enterprise Search Policy is part of Rasa's new
+- [Extractive Search](https://rasa.com/docs/reference/config/policies/extractive-search/): Rasa now supports using EnterpriseSearchPolicy without an additional call to LLMs for response generation.
+- [Flow Policy](https://rasa.com/docs/reference/config/policies/flow-policy/): The Flow Policy is part of Rasa's new
+- [Generative Search](https://rasa.com/docs/reference/config/policies/generative-search/): If Generative Search is enabled, the Enterprise Search Policy uses an LLM to generate a relevant, context-aware
+- [Intentless Policy](https://rasa.com/docs/reference/config/policies/intentless-policy/): The Intentless Policy is deprecated and not recommended for use in Rasa 3.x anymore.
+- [Policy Overview](https://rasa.com/docs/reference/config/policies/overview/): In Rasa, policies are the components responsible for dialogue management.
+- [Session Management Overview](https://rasa.com/docs/reference/config/session-management/overview/): Manage conversation sessions and user tracking in your Rasa Assistant.
+- [Session Lifecycle](https://rasa.com/docs/reference/config/session-management/session-lifecycle/): Manage conversation sessions in your Rasa Pro Assistant.
+- [Session Timer](https://rasa.com/docs/reference/config/session-management/session-timer/): Configure a session timer to automatically mark conversations as inactive after a period of inactivity.
+- [User-Scoped Conversations](https://rasa.com/docs/reference/config/session-management/user-scoped-conversations/): Associate multiple conversations with a single end user using `user_id` in Rasa Pro.
+
+### Deployment
+
+- [Automatic Conversation Deletion in Studio](https://rasa.com/docs/reference/deployment/automatic-conversation-deletion/): The Automatic Conversation Deletion allows for the periodic removal of old conversations and their associated data from Studio.
+- [Deploying Fine-Tuned LLMs for Command Generation](https://rasa.com/docs/reference/deployment/deploy-fine-tuned-model/): This page provides detailed steps for different options and optimizations of hosting a fine-tuned LLM.
+- [Multi-LLM Routing](https://rasa.com/docs/reference/deployment/multi-llm-routing/): The Multi-LLM-Routing is available starting with version 3.11.0.
+- [Rasa Pro Infrastructure Requirements](https://rasa.com/docs/reference/deployment/pro-hardware-requirements/): Minimum Hardware Requirements
+- [Rasa Pro Port and Protocol Rules](https://rasa.com/docs/reference/deployment/pro-port-and-protocol-rules/): A Rasa Pro deployment consists of various components that need to communicate with each other.
+- [Studio Infrastructure Requirements](https://rasa.com/docs/reference/deployment/studio-hardware-requirements/): Minimum Hardware Requirements
+
+### Integrations
+
+- [Rasa Action Server gRPC API](https://rasa.com/docs/reference/integrations/action-server/action-server-grpc-api/): Input and Output
+- [Actions](https://rasa.com/docs/reference/integrations/action-server/actions/): When a Rasa assistant calls a custom action, it sends a request to the action server.
+- [Deploy Action Server](https://rasa.com/docs/reference/integrations/action-server/deploy-action-server/): Deploy Action Server on Kubernetes/Openshift using Rasa Pro Helm chart
+- [Events](https://rasa.com/docs/reference/integrations/action-server/events/): Conversations in Rasa are represented as a sequence of events. Custom actions can
+- [Knowledge Base Actions](https://rasa.com/docs/reference/integrations/action-server/knowledge-bases/): This feature is experimental.
+- [Running a Rasa SDK Action Server](https://rasa.com/docs/reference/integrations/action-server/running-action-server/): Python action server, when built with Python, can be run by using rasa command or directly as a python module.
+- [Sanic Extensions](https://rasa.com/docs/reference/integrations/action-server/sanic-extensions/): You can now extend Sanic features such as middlewares, listeners, background tasks
+- [Actions](https://rasa.com/docs/reference/integrations/action-server/sdk-actions/): The Action class is the base class for any custom action. To
+- [Dispatcher](https://rasa.com/docs/reference/integrations/action-server/sdk-dispatcher/): A dispatcher is an instance of the CollectingDispatcher class used to generate responses to send back to the user.
+- [Events](https://rasa.com/docs/reference/integrations/action-server/sdk-events/): Internally, Rasa conversations are represented as
+- [Tracker](https://rasa.com/docs/reference/integrations/action-server/sdk-tracker/): The Tracker class represents a Rasa conversation tracker.
+- [Slot Validation Actions](https://rasa.com/docs/reference/integrations/action-server/validation-action/): There is a helper class in Rasa SDK with the role of executing custom slot extraction and validation:
+- [Analytics](https://rasa.com/docs/reference/integrations/analytics/): Visualize and process Rasa assistant metrics in the tooling of choice.
+- [Analytics Database](https://rasa.com/docs/reference/integrations/analytics-database/): Connect BI tools to the Studio analytics database and understand the underlying data model.
+- [kafka-plaintext-env-vars](https://rasa.com/docs/reference/integrations/analytics-event-broker-config/kafka-plaintext-env-vars/)
+- [kafka-sasl-plaintext-env-vars](https://rasa.com/docs/reference/integrations/analytics-event-broker-config/kafka-sasl-plaintext-env-vars/)
+- [kafka-sasl-ssl-env-vars](https://rasa.com/docs/reference/integrations/analytics-event-broker-config/kafka-sasl-ssl-env-vars/)
+- [kafka-ssl-env-vars](https://rasa.com/docs/reference/integrations/analytics-event-broker-config/kafka-ssl-env-vars/)
+- [Event Brokers](https://rasa.com/docs/reference/integrations/event-brokers/): Find out how open source chatbot framework Rasa allows you to stream events to a message broker.
+- [kafka-plaintext-endpoint](https://rasa.com/docs/reference/integrations/event-brokers-config/kafka-plaintext-endpoint/)
+- [kafka-sasl-plaintext-endpoint](https://rasa.com/docs/reference/integrations/event-brokers-config/kafka-sasl-plaintext-endpoint/)
+- [kafka-sasl-ssl-endpoint](https://rasa.com/docs/reference/integrations/event-brokers-config/kafka-sasl-ssl-endpoint/)
+- [kafka-ssl-endpoint](https://rasa.com/docs/reference/integrations/event-brokers-config/kafka-ssl-endpoint/)
+- [pika-endpoint](https://rasa.com/docs/reference/integrations/event-brokers-config/pika-endpoint/)
+- [Langfuse Integration](https://rasa.com/docs/reference/integrations/langfuse/): Monitor, debug, and improve LLM applications with comprehensive tracing and analytics
+- [Lock Stores](https://rasa.com/docs/reference/integrations/lock-stores/): Messages that are being processed lock Rasa for a given conversation ID to ensure that multiple incoming messages for that conversation do not interfere with each other. Rasa provides multiple implementations to maintain conversation locks.
+- [MCP Servers](https://rasa.com/docs/reference/integrations/mcp-servers/): Rasa supports native integration of MCP servers.
+- [Model Storage](https://rasa.com/docs/reference/integrations/model-storage/): You can load your trained model in three different ways:
+- [Natural Language Generation (NLG) Servers](https://rasa.com/docs/reference/integrations/nlg/): Rasa enables separating response generation by outsourcing responses to an external NLG server, optimizing workflow efficiency.
+- [Secrets Managers](https://rasa.com/docs/reference/integrations/secrets-managers/): Safeguard credentials your service uses to authenticate to external resources.
+- [Speech Integrations](https://rasa.com/docs/reference/integrations/speech-integrations/): Audio Format
+- [Timer Stores](https://rasa.com/docs/reference/integrations/timer-stores/): Configure where Rasa Pro stores session timers to ensure they persist across restarts and in multi-pod deployments.
+- [Tracing](https://rasa.com/docs/reference/integrations/tracing/): Resolve performance issues faster and identify bottlenecks through OpenTelemetry-based tracing
+- [Tracker Stores](https://rasa.com/docs/reference/integrations/tracker-stores/): All conversations are stored within a tracker store. Read how Rasa provides implementations for different store types out of the box.
+
+### Rasa Primitives
+
+- [Rasa Primitives](https://rasa.com/docs/reference/primitives/): All the foundational components used for structuring conversations within Rasa.
+- [Actions](https://rasa.com/docs/reference/primitives/actions/): Responses
+- [Conditions in Flows](https://rasa.com/docs/reference/primitives/conditions/): Conditions
+- [Contextual Response Rephraser](https://rasa.com/docs/reference/primitives/contextual-response-rephraser/): The Contextual Response Rephraser is part of Rasa's new
+- [Custom Actions](https://rasa.com/docs/reference/primitives/custom-actions/): In many cases, you can call tools of an MCP (Model Context Protocol) server directly from your flow steps as an alternative to writing custom actions.
+- [Default Actions](https://rasa.com/docs/reference/primitives/default-actions/): Each of these actions have a default behavior, described in the sections below.
+- [Events in Rasa](https://rasa.com/docs/reference/primitives/events/): Conversations are represented as sequences of events: user messages, bot responses, and actions' side effects.
+- [Flow Steps](https://rasa.com/docs/reference/primitives/flow-steps/): A flow is made up of one or more steps, each with a specific purpose.
+- [Business Logic with Flows](https://rasa.com/docs/reference/primitives/flows/): Flows are part of Rasa's new Conversational AI with Language Models (CALM) approach
+- [Intents and Entities](https://rasa.com/docs/reference/primitives/intents-and-entities/): Read more about how to format training data with Rasa NLU for open source natural language processing.
+- [Patterns](https://rasa.com/docs/reference/primitives/patterns/): Patterns implement Conversation Repair, they're fully customizable and can be used to handle conversations
+that deviate from the happy path.
+
+- [Responses](https://rasa.com/docs/reference/primitives/responses/): Defining Responses
+- [Slots](https://rasa.com/docs/reference/primitives/slots/): Slots are your assistant's memory.
+- [Starting Flows](https://rasa.com/docs/reference/primitives/starting-flows/): Starting Flows
+- [Training Data Format](https://rasa.com/docs/reference/primitives/training-data-format/): Description of the YAML format for training data
+
+### Telemetry
+
+- [Rasa Telemetry](https://rasa.com/docs/reference/telemetry/): Rasa utilizes telemetry to gather usage data, helping us continuously improve Rasa
+- [Telemetry Event Reference](https://rasa.com/docs/reference/telemetry/events/): Telemetry events are only reported if telemetry is enabled. A detailed explanation
+
+### Testing
+
+- [Assertions reference](https://rasa.com/docs/reference/testing/assertions/): This page references all the assertion types you can use in your end-to-end tests to evaluate the behavior of your assistant.
+- [Test coverage](https://rasa.com/docs/reference/testing/coverage/): This page describe the format for writing test cases.
+- [Dialogue Understanding Tests](https://rasa.com/docs/reference/testing/dialogue-understanding-tests/): Dialogue Understanding Tests are currently a beta feature. To enable the feature, set the
+- [Test Case Conversion](https://rasa.com/docs/reference/testing/test-case-conversion/): End-To-End Test Conversion
+- [Test cases reference](https://rasa.com/docs/reference/testing/test-cases/): This page describe the format for writing test cases.
+
+## Learn
+
+> Concepts, guides, and best practices.
+
+- [Build an Agent with Prompts](https://rasa.com/docs/learn/ai-assisted-development/): Build a complete Rasa agent feature end-to-end using prompt-driven development and Rasa MCP Tools.
+- [Introduction](https://rasa.com/docs/learn/introduction/): Introduction to the Rasa Platform
+- [Introduction to the Rasa Platform](https://rasa.com/docs/learn/platform-introduction/): Rasa Platform Introduction
+- [How to Use the Platform](https://rasa.com/docs/learn/platform-workflow/): Overview of the workflow of the Rasa Platform
+- [What you can build with Rasa](https://rasa.com/docs/learn/use-cases/): Understand use cases of the Rasa Platform
+
+### Best Practices
+
+- [Designing Natural and Engaging Conversations](https://rasa.com/docs/learn/best-practices/conversation-design/): Learn more about how to design your assistant using CALM and Rasa
+- [Building a Conversational AI Team](https://rasa.com/docs/learn/best-practices/conversational-ai-teams/): Learn more about how to set up a conversational AI team
+
+### Concepts
+
+- [Conversational AI with Language Models](https://rasa.com/docs/learn/concepts/calm/): (CALM) is an LLM-native approach to building reliable conversational AI.
+- [Conversation Patterns](https://rasa.com/docs/learn/concepts/conversation-patterns/): Learn more about how to use the conversation lifecycle to ensure seamless conversations.
+- [Designing the Logic Behind Conversations](https://rasa.com/docs/learn/concepts/dialogue-management/): Learn more about how to manage dialogue with Rasa
+- [Helping Your Assistant Understand Users](https://rasa.com/docs/learn/concepts/dialogue-understanding/): Learn more about how Rasa assistants make decisions.
+
+### Deployment
+
+- [AWS Cleanup Infrastructure [Optional]](https://rasa.com/docs/learn/deployment/aws/aws-playbook-cleanup/): Following these steps will delete all of the infrastructure and configuration you have deployed in all the previous steps. You'll need to set the environment variables defined in Setup Steps before you begin.
+- [Deploy Infrastructure](https://rasa.com/docs/learn/deployment/aws/aws-playbook-infra/): Before you begin, ensure you've completed the Setup Steps to set environment variables and clone a repo that this section requires.
+- [Installing on Amazon Web Services (AWS)](https://rasa.com/docs/learn/deployment/aws/aws-playbook-intro/): This playbook outlines an opinionated, best-practice way to install Rasa Pro and Rasa Studio on AWS. You may wish to adapt steps and configuration to meet your needs or organisational policies as required.
+- [Configure Your Kubernetes Cluster](https://rasa.com/docs/learn/deployment/aws/aws-playbook-k8s/): Before you begin, ensure you've completed all the previous sections to deploy required infrastructure and to set environment variables that this section requires.
+- [Install Rasa](https://rasa.com/docs/learn/deployment/aws/aws-playbook-rasa/): Before you begin, ensure you've completed all the previous sections to deploy required infrastructure and to set environment variables that this section requires.
+- [Setup](https://rasa.com/docs/learn/deployment/aws/aws-playbook-setup/): Prerequisites
+- [Set Up Your Agent On AWS](https://rasa.com/docs/learn/deployment/aws/aws-playbook-setup-agent/): Before you begin, ensure you've finished installing Rasa Pro on Amazon Web Services:
+- [Install Rasa Studio](https://rasa.com/docs/learn/deployment/aws/aws-playbook-studio/): Before you begin, ensure you've completed all of the previous sections to deploy required infrastructure and to set environment variables that this section requires.
+- [Azure Cleanup Infrastructure [Optional]](https://rasa.com/docs/learn/deployment/azure/azure-playbook-cleanup/): Following these steps will delete all of the infrastructure and configuration you have deployed in all the previous steps. You'll need to set the environment variables defined in Setup Steps before you begin.
+- [Deploy Infrastructure](https://rasa.com/docs/learn/deployment/azure/azure-playbook-infra/): Before you begin, ensure you've completed the Setup Steps to set environment variables and clone a repo that this section requires.
+- [Installing on Microsoft Azure](https://rasa.com/docs/learn/deployment/azure/azure-playbook-intro/): This playbook outlines an opinionated, best-practice way to install Rasa Pro and Rasa Studio on Azure. You may wish to adapt steps and configuration to meet your needs or organisational policies as required.
+- [Configure Your Kubernetes Cluster](https://rasa.com/docs/learn/deployment/azure/azure-playbook-k8s/): Before you begin, ensure you've completed all of the previous sections to deploy required infrastructure and to set environment variables that this section requires.
+- [Install Rasa](https://rasa.com/docs/learn/deployment/azure/azure-playbook-rasa/): Before you begin, ensure you've completed all of the previous sections to deploy required infrastructure and to set environment variables that this section requires.
+- [Setup](https://rasa.com/docs/learn/deployment/azure/azure-playbook-setup/): Prerequisites
+- [Set Up Your Agent On Azure](https://rasa.com/docs/learn/deployment/azure/azure-playbook-setup-agent/): Before you begin, ensure you've finished installing Rasa Pro on Microsoft Azure:
+- [Install Rasa Studio](https://rasa.com/docs/learn/deployment/azure/azure-playbook-studio/): Before you begin, ensure you've completed all of the previous sections to deploy required infrastructure and to set environment variables that this section requires.
+- [GCP Cleanup Infrastructure [Optional]](https://rasa.com/docs/learn/deployment/gcp/gcp-playbook-cleanup/): Following these steps will delete all of the infrastructure and configuration you have deployed in all the previous steps. You'll need to set the environment variables defined in Setup Steps before you begin.
+- [Deploy Infrastructure](https://rasa.com/docs/learn/deployment/gcp/gcp-playbook-infra/): Before you begin, ensure you've completed the Setup Steps to set environment variables and clone a repo that this section requires.
+- [Installing on Google Cloud Platform](https://rasa.com/docs/learn/deployment/gcp/gcp-playbook-intro/): This playbook outlines an opinionated, best-practice way to install Rasa Pro and Rasa Studio on Google Cloud Platform. You may wish to adapt steps and configuration to meet your needs or organisational policies as required.
+- [Configure Your Kubernetes Cluster](https://rasa.com/docs/learn/deployment/gcp/gcp-playbook-k8s/): Before you begin, ensure you've completed all of the previous sections to deploy required infrastructure and to set environment variables that this section requires.
+- [Install Rasa](https://rasa.com/docs/learn/deployment/gcp/gcp-playbook-rasa/): Before you begin, ensure you've completed all of the previous sections to deploy required infrastructure and to set environment variables that this section requires.
+- [Setup](https://rasa.com/docs/learn/deployment/gcp/gcp-playbook-setup/): Prerequisites
+- [Set Up Your Agent On GCP](https://rasa.com/docs/learn/deployment/gcp/gcp-playbook-setup-agent/): Before you begin, ensure you've finished installing Rasa Pro on Google Cloud Platform:
+- [Install Rasa Studio](https://rasa.com/docs/learn/deployment/gcp/gcp-playbook-studio/): Before you begin, ensure you've completed all of the previous sections to deploy required infrastructure and to set environment variables that this section requires.
+
+### Guides
+
+- [Custom Actions in Rasa](https://rasa.com/docs/learn/guides/adding-custom-actions/): Learn more about how to design your assistant
+- [Integrate RAG in Rasa](https://rasa.com/docs/learn/guides/integrating-rag/): Learn more about how to design your assistant
+
+### Quickstart
+
+- [Developer Quickstart](https://rasa.com/docs/learn/quickstart/pro/): Fastest happy path to run Rasa, connect MCP tools, and build your first agent.
+
+## API Specifications
+
+> OpenAPI and HTTP API reference.
+
+- [Rasa SDK - Action Server Endpoint (0.0.0)](https://rasa.com/docs/openapi/action-server-api/): HTTP API of the action server which is used by Rasa to execute custom actions.
+- [Rasa - Server Endpoints (1.0.0)](https://rasa.com/docs/openapi/http-api/): The Rasa server provides endpoints to retrieve trackers of conversations as well as endpoints to modify them. Additionally, endpoints for training and testing models are provided.
+
+## Docs
+
+- [Introduction to Rasa Action Server](https://rasa.com/docs/action-server/): A Rasa action server runs custom actions for a Rasa
+- [Bundled prompt templates (documentation)](https://rasa.com/docs/snippets/prompt-templates/): This directory holds copies of default Jinja2 prompts that ship with Rasa, so MDX pages can import them as raw strings (see plugins/jinja2-raw-loader and src/components/PromptTemplateBlock).

@@ -1,0 +1,5 @@
+mode: stdio
+project_path: /Users/wendy.mak/work/experiments/ai-perf-course-hw-pub-booking
+docs_mode: offline
+ide_integrations:
+- claude

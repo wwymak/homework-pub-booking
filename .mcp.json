@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "rasa-tools": {
+      "command": "/Users/wendy.mak/work/experiments/ai-perf-course-hw-pub-booking/.venv/bin/python3",
+      "args": [
+        "-m",
+        "rasa",
+        "tools",
+        "run",
+        "--mode",
+        "stdio",
+        "--project-path",
+        "/Users/wendy.mak/work/experiments/ai-perf-course-hw-pub-booking"
+      ]
+    }
+  }
+}
