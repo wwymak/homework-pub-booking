@@ -10,6 +10,7 @@ import sys
 
 from sovereign_agent._internal.llm_client import (
     FakeLLMClient,
+    OpenAICompatibleClient,
     ScriptedResponse,
     ToolCall,
 )
@@ -139,11 +140,28 @@ async def run_scenario(real: bool) -> int:
         else:
             rasa_half = RasaStructuredHalf()
 
-        client = _build_fake_client_two_rounds()
         tools = build_tool_registry(session)
+
+        if real:
+            from sovereign_agent.config import Config
+
+            cfg = Config.from_env()
+            print(f"  LLM: {cfg.llm_base_url} (live)")
+            print(f"  planner:  {cfg.llm_planner_model}")
+            print(f"  executor: {cfg.llm_executor_model}")
+            client = OpenAICompatibleClient(
+                base_url=cfg.llm_base_url,
+                api_key_env=cfg.llm_api_key_env,
+            )
+            planner_model = cfg.llm_planner_model
+            executor_model = cfg.llm_executor_model
+        else:
+            client = _build_fake_client_two_rounds()
+            planner_model = executor_model = "fake"
+
         loop_half = LoopHalf(
-            planner=DefaultPlanner(model="fake", client=client),
-            executor=DefaultExecutor(model="fake", client=client, tools=tools),  # type: ignore[arg-type]
+            planner=DefaultPlanner(model=planner_model, client=client),
+            executor=DefaultExecutor(model=executor_model, client=client, tools=tools),  # type: ignore[arg-type]
         )
         bridge = HandoffBridge(
             loop_half=loop_half,
