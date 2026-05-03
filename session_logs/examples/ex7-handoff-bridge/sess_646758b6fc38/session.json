@@ -1,0 +1,75 @@
+{
+  "session_id": "sess_646758b6fc38",
+  "version": 1,
+  "created_at": "2026-05-03T16:53:45.840707+00:00",
+  "updated_at": "2026-05-03T16:56:03.408012+00:00",
+  "scenario": "ex7-handoff-bridge",
+  "state": "completed",
+  "user_id": null,
+  "current_half": "loop",
+  "planner": {
+    "subgoals": [
+      {
+        "id": "sg_1",
+        "description": "Search for venues that can accommodate a party of 8 or fewer people.",
+        "success_criterion": "Returns at least one venue option with party_size <=8.",
+        "estimated_tool_calls": 1,
+        "depends_on": [],
+        "assigned_half": "loop",
+        "status": "pending"
+      },
+      {
+        "id": "sg_2",
+        "description": "Calculate the cost for the selected venue from the search results.",
+        "success_criterion": "Cost is successfully calculated for the chosen venue.",
+        "estimated_tool_calls": 1,
+        "depends_on": [
+          "sg_1"
+        ],
+        "assigned_half": "loop",
+        "status": "pending"
+      },
+      {
+        "id": "sg_3",
+        "description": "Hand off the corrected booking data to the structured half for approval.",
+        "success_criterion": "Structured half accepts the handoff and processes the booking.",
+        "estimated_tool_calls": 1,
+        "depends_on": [
+          "sg_2"
+        ],
+        "assigned_half": "structured",
+        "status": "pending"
+      }
+    ]
+  },
+  "executor": {},
+  "structured": {},
+  "memory": {},
+  "handoff_history": [],
+  "bare_mode": false,
+  "config_overrides": {},
+  "result": {
+    "committed": true,
+    "booking": {
+      "venue_id": "haymarket_tap",
+      "date": "2023-12-25",
+      "time": "19:00",
+      "party_size": 8,
+      "deposit_gbp": 135,
+      "duration_hours": 3,
+      "catering_tier": "bar_snacks"
+    },
+    "booking_reference": "BK-AA70B549",
+    "rasa_response": [
+      {
+        "recipient_id": "homework-4badbd59",
+        "text": "Booking confirmed. Reference: BK-AA70B549."
+      },
+      {
+        "recipient_id": "homework-4badbd59",
+        "text": "Is there anything else I can help you with?"
+      }
+    ]
+  },
+  "resumed_from": null
+}

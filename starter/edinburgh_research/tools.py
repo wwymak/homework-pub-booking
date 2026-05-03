@@ -88,8 +88,7 @@ def venue_search(near: str, party_size: int, budget_max_gbp: int = 1000) -> Tool
                 output["hint"] = (
                     f"Venues exist in '{near}' but none seat {party_size}. "
                     f"Largest capacity in this area: {max_seats}. "
-                    "Try relaxing ONE constraint at a time: first try a "
-                    "different area, keeping party_size=12. "
+                    "Try a different area first, keeping the same party_size. "
                     f"Valid areas: {', '.join(all_areas)}. "
                     "Do NOT hand off without a venue_id."
                 )

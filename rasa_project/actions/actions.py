@@ -20,13 +20,14 @@ Why metadata, not slots?
 from __future__ import annotations
 
 import hashlib
+import os
 from typing import Any
 
 from rasa_sdk import Action, Tracker
 from rasa_sdk.events import SlotSet
 from rasa_sdk.executor import CollectingDispatcher
 
-MAX_PARTY_SIZE_FOR_AUTO_BOOKING = 8
+MAX_PARTY_SIZE_FOR_AUTO_BOOKING = int(os.environ.get("MAX_PARTY_SIZE", "8"))
 MAX_DEPOSIT_FOR_AUTO_BOOKING_GBP = 300
 MIN_PARTY_SIZE_FOR_BOOKING = 4
 

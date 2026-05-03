@@ -1,0 +1,20 @@
+{
+  "ticket_id": "tk_f7f14b2b",
+  "operation": "executor.run_subgoal/sg_1",
+  "started_at": "2026-05-03T16:54:10.348061+00:00",
+  "completed_at": "2026-05-03T16:55:02.455542+00:00",
+  "duration_ms": 52107,
+  "outputs": [
+    {
+      "path": "/Users/wendy.mak/work/experiments/ai-perf-course-hw-pub-booking/session_logs/examples/ex7-handoff-bridge/sess_646758b6fc38/logs/tickets/tk_f7f14b2b/raw_output.json",
+      "sha256": "5983f1240275e23558a5f282f1db27570524c213e06ff3277d947762e0136d54",
+      "size_bytes": 2118,
+      "content_type": "application/json"
+    }
+  ],
+  "metrics": {
+    "tool_calls": 5,
+    "turns_used": 5,
+    "handoff_requested": true
+  }
+}

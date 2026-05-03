@@ -308,7 +308,7 @@ ex7: ## Run Ex7 (handoff bridge) end-to-end
 
 .PHONY: ex7-real
 ex7-real: ## Run Ex7 (handoff bridge) with real LLM (uses tokens!)
-	@$(UV) run python -m starter.handoff_bridge.run --real
+	@MAX_PARTY_SIZE=16 $(UV) run python -m starter.handoff_bridge.run --real
 
 .PHONY: ex8-text
 ex8-text: ## Run Ex8 (voice pipeline) in TEXT-ONLY mode — no Speechmatics needed

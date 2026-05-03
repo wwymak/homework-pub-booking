@@ -138,7 +138,7 @@ async def run_scenario(real: bool) -> int:
         # Spawn mock Rasa unless --real
         server = None
         if not real:
-            server, _thread, mock_url = spawn_mock_rasa(port=5906)
+            server, _thread, mock_url = spawn_mock_rasa(port=5906, max_party_size=16)
             rasa_half = RasaStructuredHalf(rasa_url=mock_url)
         else:
             rasa_half = RasaStructuredHalf()

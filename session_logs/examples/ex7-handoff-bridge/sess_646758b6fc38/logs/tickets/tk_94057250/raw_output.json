@@ -1,0 +1,71 @@
+{
+  "subgoal_id": "sg_1",
+  "success": true,
+  "final_answer": "(handoff requested)",
+  "tool_calls_made": [
+    {
+      "name": "venue_search",
+      "arguments": {
+        "near": "Edinburgh",
+        "party_size": 8,
+        "budget_max_gbp": 1000
+      },
+      "success": true,
+      "summary": "venue_search(Edinburgh, party=8): 0 result(s)",
+      "requires_human_approval": false
+    },
+    {
+      "name": "venue_search",
+      "arguments": {
+        "near": "Haymarket",
+        "party_size": 8,
+        "budget_max_gbp": 1000
+      },
+      "success": true,
+      "summary": "venue_search(Haymarket, party=8): 1 result(s)",
+      "requires_human_approval": false
+    },
+    {
+      "name": "calculate_cost",
+      "arguments": {
+        "venue_id": "haymarket_tap",
+        "party_size": 8,
+        "duration_hours": 3,
+        "catering_tier": "bar_snacks"
+      },
+      "success": true,
+      "summary": "calculate_cost(haymarket_tap, 8): total \u00a3675, deposit \u00a3135",
+      "requires_human_approval": false
+    },
+    {
+      "name": "handoff_to_structured",
+      "arguments": {
+        "reason": "Venue found and cost calculated. Ready for booking confirmation.",
+        "context": "Haymarket Tap (ID: haymarket_tap) can accommodate 8 guests. Total cost \u00a3675 with \u00a3135 deposit required.",
+        "data": {
+          "venue_id": "haymarket_tap",
+          "date": "2023-12-25",
+          "time": "19:00",
+          "party_size": 8,
+          "deposit": 135
+        }
+      },
+      "success": true,
+      "summary": "handoff to structured half: Venue found and cost calculated. Ready for booking confirmation.",
+      "requires_human_approval": false
+    }
+  ],
+  "turns_used": 4,
+  "handoff_requested": true,
+  "handoff_payload": {
+    "reason": "Venue found and cost calculated. Ready for booking confirmation.",
+    "context": "Haymarket Tap (ID: haymarket_tap) can accommodate 8 guests. Total cost \u00a3675 with \u00a3135 deposit required.",
+    "data": {
+      "venue_id": "haymarket_tap",
+      "date": "2023-12-25",
+      "time": "19:00",
+      "party_size": 8,
+      "deposit": 135
+    }
+  }
+}

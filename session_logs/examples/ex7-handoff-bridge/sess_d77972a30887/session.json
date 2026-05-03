@@ -1,0 +1,42 @@
+{
+  "session_id": "sess_d77972a30887",
+  "version": 1,
+  "created_at": "2026-05-03T16:18:32.219551+00:00",
+  "updated_at": "2026-05-03T16:18:48.503083+00:00",
+  "scenario": "ex7-handoff-bridge",
+  "state": "executing",
+  "user_id": null,
+  "current_half": "loop",
+  "planner": {
+    "subgoals": [
+      {
+        "id": "sg_1",
+        "description": "Search for available venues in Haymarket accommodating 12 people on 2026-04-25 at 19:30",
+        "success_criterion": "List of available venues returned with details",
+        "estimated_tool_calls": 1,
+        "depends_on": [],
+        "assigned_half": "loop",
+        "status": "pending"
+      },
+      {
+        "id": "sg_2",
+        "description": "Book the first available venue from the search results",
+        "success_criterion": "Booking confirmation received",
+        "estimated_tool_calls": 1,
+        "depends_on": [
+          "sg_1"
+        ],
+        "assigned_half": "loop",
+        "status": "pending"
+      }
+    ]
+  },
+  "executor": {},
+  "structured": {},
+  "memory": {},
+  "handoff_history": [],
+  "bare_mode": false,
+  "config_overrides": {},
+  "result": null,
+  "resumed_from": null
+}

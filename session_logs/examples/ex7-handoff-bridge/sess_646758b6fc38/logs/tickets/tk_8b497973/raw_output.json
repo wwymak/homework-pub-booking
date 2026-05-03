@@ -1,0 +1,33 @@
+[
+  {
+    "id": "sg_1",
+    "description": "Search for venues that can accommodate a party of 8 or fewer people.",
+    "success_criterion": "Returns at least one venue option with party_size <=8.",
+    "estimated_tool_calls": 1,
+    "depends_on": [],
+    "assigned_half": "loop",
+    "status": "pending"
+  },
+  {
+    "id": "sg_2",
+    "description": "Calculate the cost for the selected venue from the search results.",
+    "success_criterion": "Cost is successfully calculated for the chosen venue.",
+    "estimated_tool_calls": 1,
+    "depends_on": [
+      "sg_1"
+    ],
+    "assigned_half": "loop",
+    "status": "pending"
+  },
+  {
+    "id": "sg_3",
+    "description": "Hand off the corrected booking data to the structured half for approval.",
+    "success_criterion": "Structured half accepts the handoff and processes the booking.",
+    "estimated_tool_calls": 1,
+    "depends_on": [
+      "sg_2"
+    ],
+    "assigned_half": "structured",
+    "status": "pending"
+  }
+]

@@ -424,7 +424,11 @@ class RasaHostLifecycle:
 class _MockRasaHandler(BaseHTTPRequestHandler):
     """Stdlib mock of Rasa's REST webhook. Same party/deposit rules
     as real ActionValidateBooking so the two paths give identical
-    answers for a given input."""
+    answers for a given input.
+
+    ``max_party_size`` is read from the server instance so it can be
+    configured per-exercise (ex6 uses 8, ex7 uses 16).
+    """
 
     def log_message(self, fmt, *args):  # noqa: N802
         return
@@ -440,6 +444,7 @@ class _MockRasaHandler(BaseHTTPRequestHandler):
         booking = payload.get("metadata", {}).get("booking", {})
         party = booking.get("party_size")
         deposit = booking.get("deposit_gbp", 0)
+        max_party = getattr(self.server, "max_party_size", 8)
 
         if not party:
             response = [
@@ -455,7 +460,7 @@ class _MockRasaHandler(BaseHTTPRequestHandler):
                     "custom": {"action": "rejected", "reason": "party_too_small"},
                 }
             ]
-        elif party > 8:
+        elif party > max_party:
             response = [
                 {
                     "text": "Sorry, we can't accept this booking. Reason: party_too_large",
@@ -491,8 +496,19 @@ class _MockRasaHandler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(response).encode("utf-8"))
 
 
-def spawn_mock_rasa(port: int = 5905) -> tuple[ThreadingHTTPServer, threading.Thread, str]:
+def spawn_mock_rasa(
+    port: int = 5905,
+    *,
+    max_party_size: int = 8,
+) -> tuple[ThreadingHTTPServer, threading.Thread, str]:
+    """Spawn a mock Rasa REST webhook server for offline testing.
+
+    Args:
+        port: Port to bind on localhost.
+        max_party_size: Maximum party size the mock will auto-approve.
+    """
     server = ThreadingHTTPServer(("127.0.0.1", port), _MockRasaHandler)
+    server.max_party_size = max_party_size  # type: ignore[attr-defined]
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     url = f"http://127.0.0.1:{port}/webhooks/rest/webhook"

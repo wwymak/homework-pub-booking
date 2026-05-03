@@ -295,14 +295,14 @@ def _build_constraint_relaxation_task(loop_result: HalfResult, rejection: str) -
             f"The previous search returned no usable venue. {rejection}\n\n"
             "RULES FOR RETRYING:\n"
             "1. Relax ONE constraint at a time. Keep the original party_size "
-            "(12) and try different areas first.\n"
+            "and try different areas first.\n"
             "2. Valid venue areas: Haymarket, Old Town, Duddingston, Tollcross, "
             "New Town. Use these EXACT names — 'Edinburgh' is NOT a valid area.\n"
             "3. Only reduce party_size as a LAST RESORT after trying all areas.\n"
-            "4. When you find a venue, you MUST call handoff_to_structured with "
-            "the venue data INCLUDING venue_id, date, time, party_size, and "
-            "deposit in the 'data' field. Do NOT hand off without venue_id.\n"
-            "5. Do NOT call complete_task — that is the structured half's job."
+            "4. When you find a venue, call calculate_cost to get the deposit, "
+            "then call handoff_to_structured with the venue data INCLUDING "
+            "venue_id, date, time, party_size, and deposit in the 'data' dict.\n"
+            "5. Do NOT call complete_task — the structured half confirms."
         ),
         "context": {
             "prior_result": loop_result.output,
@@ -316,10 +316,29 @@ def _build_constraint_relaxation_task(loop_result: HalfResult, rejection: str) -
 def build_reverse_task(loop_result: HalfResult, struct_result: HalfResult) -> dict:
     """Build the task dict to pass back to the loop half after a reject."""
     reason = struct_result.output.get("reason") or struct_result.summary
+    reason_lower = reason.lower()
+
+    guidance = ""
+    if "party_too_large" in reason_lower:
+        guidance = (
+            "\nThe booking system rejected the party size as too large. "
+            "Reduce party_size in your next proposal."
+        )
+    elif "deposit_too_high" in reason_lower:
+        guidance = (
+            "\nThe booking system rejects deposits over £300. "
+            "Find a cheaper venue or reduce duration/catering tier."
+        )
+    elif "party_too_small" in reason_lower:
+        guidance = "\nThe booking system requires a minimum party size of 4."
+
     return {
         "task": (
             "The structured half rejected the previous proposal. "
-            f"Reason: {reason}. Produce an alternative."
+            f"Reason: {reason}.{guidance}\n\n"
+            "Produce an alternative. Use venue_search, then calculate_cost, "
+            "then handoff_to_structured with the corrected data. "
+            "Do NOT call complete_task."
         ),
         "context": {
             "prior_result": loop_result.output,
