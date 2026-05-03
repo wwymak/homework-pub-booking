@@ -1,0 +1,35 @@
+{
+  "subgoal_id": "sg_3",
+  "success": true,
+  "final_answer": "(handoff requested)",
+  "tool_calls_made": [
+    {
+      "name": "handoff_to_structured",
+      "arguments": {
+        "reason": "Need previous search parameters (near, party_size) to perform budget-increased venue search",
+        "context": "Subgoal sg_3: Increasing budget to find valid venue_id",
+        "data": {
+          "required_parameters": [
+            "near",
+            "party_size"
+          ]
+        }
+      },
+      "success": true,
+      "summary": "handoff to structured half: Need previous search parameters (near, party_size) to perform budget-increased venue search",
+      "requires_human_approval": false
+    }
+  ],
+  "turns_used": 1,
+  "handoff_requested": true,
+  "handoff_payload": {
+    "reason": "Need previous search parameters (near, party_size) to perform budget-increased venue search",
+    "context": "Subgoal sg_3: Increasing budget to find valid venue_id",
+    "data": {
+      "required_parameters": [
+        "near",
+        "party_size"
+      ]
+    }
+  }
+}

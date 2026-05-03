@@ -30,6 +30,7 @@ from sovereign_agent.planner import DefaultPlanner
 from sovereign_agent.session.directory import create_session
 from sovereign_agent.tickets.ticket import list_tickets
 
+from starter._trace_stream import enable_trace_streaming
 from starter.edinburgh_research.integrity import clear_log, verify_dataflow
 from starter.edinburgh_research.tools import build_tool_registry
 
@@ -222,6 +223,7 @@ async def run_scenario(real: bool) -> int:
         )
         print(f"Session {session.session_id}")
         print(f"  dir: {session.directory}")
+        enable_trace_streaming(session)
 
         if real:
             from sovereign_agent.config import Config

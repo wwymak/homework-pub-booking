@@ -1,0 +1,66 @@
+[
+  {
+    "id": "sg_1",
+    "description": "Search for venues in Haymarket area",
+    "success_criterion": "At least one venue with venue_id is found",
+    "estimated_tool_calls": 1,
+    "depends_on": [],
+    "assigned_half": "loop",
+    "status": "pending"
+  },
+  {
+    "id": "sg_2",
+    "description": "Search for venues in Old Town area",
+    "success_criterion": "At least one venue with venue_id is found",
+    "estimated_tool_calls": 1,
+    "depends_on": [
+      "sg_1"
+    ],
+    "assigned_half": "loop",
+    "status": "pending"
+  },
+  {
+    "id": "sg_3",
+    "description": "Search for venues in Duddingston area",
+    "success_criterion": "At least one venue with venue_id is found",
+    "estimated_tool_calls": 1,
+    "depends_on": [
+      "sg_2"
+    ],
+    "assigned_half": "loop",
+    "status": "pending"
+  },
+  {
+    "id": "sg_4",
+    "description": "Search for venues in Tollcross area",
+    "success_criterion": "At least one venue with venue_id is found",
+    "estimated_tool_calls": 1,
+    "depends_on": [
+      "sg_3"
+    ],
+    "assigned_half": "loop",
+    "status": "pending"
+  },
+  {
+    "id": "sg_5",
+    "description": "Search for venues in New Town area",
+    "success_criterion": "At least one venue with venue_id is found",
+    "estimated_tool_calls": 1,
+    "depends_on": [
+      "sg_4"
+    ],
+    "assigned_half": "loop",
+    "status": "pending"
+  },
+  {
+    "id": "sg_6",
+    "description": "Reduce party_size to 10 and search again",
+    "success_criterion": "At least one venue with venue_id is found",
+    "estimated_tool_calls": 1,
+    "depends_on": [
+      "sg_5"
+    ],
+    "assigned_half": "loop",
+    "status": "pending"
+  }
+]

@@ -1,0 +1,57 @@
+{
+  "session_id": "sess_042bada6c108",
+  "version": 1,
+  "created_at": "2026-05-03T15:32:40.349829+00:00",
+  "updated_at": "2026-05-03T15:36:40.521159+00:00",
+  "scenario": "ex7-handoff-bridge",
+  "state": "failed",
+  "user_id": null,
+  "current_half": "loop",
+  "planner": {
+    "subgoals": [
+      {
+        "id": "sg_1",
+        "description": "Search for venues in broader areas (e.g., Old Town, New Town, Edinburgh) to find a valid venue_id",
+        "success_criterion": "Search returns at least one venue with a valid venue_id",
+        "estimated_tool_calls": 1,
+        "depends_on": [],
+        "assigned_half": "loop",
+        "status": "pending"
+      },
+      {
+        "id": "sg_2",
+        "description": "Reduce party size requirement and search again for venues",
+        "success_criterion": "Search returns at least one venue with a valid venue_id",
+        "estimated_tool_calls": 1,
+        "depends_on": [
+          "sg_1"
+        ],
+        "assigned_half": "loop",
+        "status": "pending"
+      },
+      {
+        "id": "sg_3",
+        "description": "Increase budget and search again for venues",
+        "success_criterion": "Search returns at least one venue with a valid venue_id",
+        "estimated_tool_calls": 1,
+        "depends_on": [
+          "sg_2"
+        ],
+        "assigned_half": "loop",
+        "status": "pending"
+      }
+    ]
+  },
+  "executor": {},
+  "structured": {},
+  "memory": {},
+  "handoff_history": [],
+  "bare_mode": false,
+  "config_overrides": {},
+  "result": {
+    "reason": {
+      "reason": "max_rounds=3 exceeded"
+    }
+  },
+  "resumed_from": null
+}

@@ -1,0 +1,35 @@
+{
+  "subgoal_id": "sg_1",
+  "success": true,
+  "final_answer": "(handoff requested)",
+  "tool_calls_made": [
+    {
+      "name": "handoff_to_structured",
+      "arguments": {
+        "reason": "Missing required parameters for venue_search (near and party_size). Need to collect location and party size details to look up venue_id.",
+        "context": "Subgoal sg_1: Retrieve venue_id from venue database",
+        "data": {
+          "missing_parameters": [
+            "near",
+            "party_size"
+          ]
+        }
+      },
+      "success": true,
+      "summary": "handoff to structured half: Missing required parameters for venue_search (near and party_size). Need to collect location and party size details to look up venue_id.",
+      "requires_human_approval": false
+    }
+  ],
+  "turns_used": 1,
+  "handoff_requested": true,
+  "handoff_payload": {
+    "reason": "Missing required parameters for venue_search (near and party_size). Need to collect location and party size details to look up venue_id.",
+    "context": "Subgoal sg_1: Retrieve venue_id from venue database",
+    "data": {
+      "missing_parameters": [
+        "near",
+        "party_size"
+      ]
+    }
+  }
+}

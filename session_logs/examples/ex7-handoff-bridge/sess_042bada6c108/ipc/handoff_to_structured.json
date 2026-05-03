@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "from_half": "loop",
+  "to_half": "structured",
+  "written_at": "2026-05-03T15:36:40.512663+00:00",
+  "session_id": "sess_042bada6c108",
+  "reason": "Need to retrieve previous venue search parameters (near, original party size) to adjust and resubmit",
+  "context": "Venue search failed previously due to high party size; now reducing size and retrying",
+  "data": {},
+  "return_instructions": ""
+}

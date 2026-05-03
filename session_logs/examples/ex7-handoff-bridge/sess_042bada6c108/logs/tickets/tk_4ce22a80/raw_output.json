@@ -1,0 +1,33 @@
+[
+  {
+    "id": "sg_1",
+    "description": "Collect the date and time for the party from the user",
+    "success_criterion": "Date and time are provided by the user",
+    "estimated_tool_calls": 1,
+    "depends_on": [],
+    "assigned_half": "loop",
+    "status": "pending"
+  },
+  {
+    "id": "sg_2",
+    "description": "Search for available venues in Haymarket that can accommodate 12 people on the specified date",
+    "success_criterion": "List of available venues is retrieved and user selects one",
+    "estimated_tool_calls": 1,
+    "depends_on": [
+      "sg_1"
+    ],
+    "assigned_half": "loop",
+    "status": "pending"
+  },
+  {
+    "id": "sg_3",
+    "description": "Confirm and finalize the booking for the selected venue",
+    "success_criterion": "Booking confirmation with reservation ID is received",
+    "estimated_tool_calls": 1,
+    "depends_on": [
+      "sg_2"
+    ],
+    "assigned_half": "structured",
+    "status": "pending"
+  }
+]

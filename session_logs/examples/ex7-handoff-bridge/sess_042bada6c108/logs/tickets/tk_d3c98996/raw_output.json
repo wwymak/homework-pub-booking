@@ -1,0 +1,33 @@
+[
+  {
+    "id": "sg_1",
+    "description": "Search in a broader area (e.g., Old Town, New Town, Edinburgh) to find a venue with a valid venue_id",
+    "success_criterion": "A venue with a valid venue_id is returned in the search results",
+    "estimated_tool_calls": 1,
+    "depends_on": [],
+    "assigned_half": "loop",
+    "status": "pending"
+  },
+  {
+    "id": "sg_2",
+    "description": "Reduce party size requirement and search again to find a venue with valid venue_id",
+    "success_criterion": "Venue with valid venue_id is found with reduced party size",
+    "estimated_tool_calls": 1,
+    "depends_on": [
+      "sg_1"
+    ],
+    "assigned_half": "loop",
+    "status": "pending"
+  },
+  {
+    "id": "sg_3",
+    "description": "Increase budget and search again to find a venue with valid venue_id",
+    "success_criterion": "Venue with valid venue_id is found with higher budget",
+    "estimated_tool_calls": 1,
+    "depends_on": [
+      "sg_2"
+    ],
+    "assigned_half": "loop",
+    "status": "pending"
+  }
+]

@@ -28,6 +28,7 @@ import sys
 from sovereign_agent._internal.paths import example_sessions_dir
 from sovereign_agent.session.directory import create_session
 
+from starter._trace_stream import enable_trace_streaming
 from starter.rasa_half.structured_half import (
     RasaHostLifecycle,
     RasaStructuredHalf,
@@ -44,6 +45,7 @@ async def run_scenario(real: bool, auto: bool) -> int:
         )
         print(f"📂 Session {session.session_id}")
         print(f"   dir: {session.directory}")
+        enable_trace_streaming(session)
 
         sample_booking = {
             "data": {

@@ -9,6 +9,7 @@ import sys
 from sovereign_agent._internal.paths import user_data_dir
 from sovereign_agent.session.directory import create_session
 
+from starter._trace_stream import enable_trace_streaming
 from starter.voice_pipeline.manager_persona import ManagerPersona
 from starter.voice_pipeline.voice_loop import run_text_mode, run_voice_mode
 
@@ -24,6 +25,7 @@ async def main_async(voice: bool) -> int:
     )
     print(f"Session {session.session_id}")
     print(f"  dir: {session.directory}")
+    enable_trace_streaming(session)
 
     if not os.environ.get("NEBIUS_KEY"):
         print("✗ NEBIUS_KEY not set. Run 'make verify' first.", file=sys.stderr)

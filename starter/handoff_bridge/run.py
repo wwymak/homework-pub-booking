@@ -20,6 +20,7 @@ from sovereign_agent.halves.loop import LoopHalf
 from sovereign_agent.planner import DefaultPlanner
 from sovereign_agent.session.directory import create_session
 
+from starter._trace_stream import enable_trace_streaming
 from starter.edinburgh_research.tools import build_tool_registry
 from starter.handoff_bridge.bridge import HandoffBridge
 from starter.rasa_half.structured_half import RasaStructuredHalf, spawn_mock_rasa
@@ -124,13 +125,15 @@ def _build_fake_client_two_rounds() -> FakeLLMClient:
 
 async def run_scenario(real: bool) -> int:
     with example_sessions_dir("ex7-handoff-bridge", persist=real) as sessions_root:
+        task = "Book a venue for 12 people in Haymarket, Friday 2026-04-25 19:30."
         session = create_session(
             scenario="ex7-handoff-bridge",
-            task="Book a venue for 12 people in Haymarket, Friday 19:30.",
+            task=task,
             sessions_dir=sessions_root,
         )
         print(f"Session {session.session_id}")
         print(f"  dir: {session.directory}")
+        enable_trace_streaming(session)
 
         # Spawn mock Rasa unless --real
         server = None
@@ -159,18 +162,36 @@ async def run_scenario(real: bool) -> int:
             client = _build_fake_client_two_rounds()
             planner_model = executor_model = "fake"
 
+        executor_system = (
+            "You are the EXECUTOR of a booking research agent. Your job is to "
+            "find a venue and hand it off for confirmation.\n\n"
+            "WORKFLOW:\n"
+            "1. Use venue_search to find a venue that fits the requirements.\n"
+            "2. Use calculate_cost to compute the total and deposit.\n"
+            "3. Call handoff_to_structured with ALL booking data in the 'data' "
+            "dict: venue_id, date, time, party_size, and deposit "
+            "(use deposit_required_gbp from calculate_cost).\n\n"
+            "IMPORTANT: Do NOT call complete_task — the structured half "
+            "confirms bookings, not you. Always hand off via "
+            "handoff_to_structured when you have a venue."
+        )
         loop_half = LoopHalf(
             planner=DefaultPlanner(model=planner_model, client=client),
-            executor=DefaultExecutor(model=executor_model, client=client, tools=tools),  # type: ignore[arg-type]
+            executor=DefaultExecutor(
+                model=executor_model,
+                client=client,
+                tools=tools,
+                system_prompt=executor_system,
+            ),  # type: ignore[arg-type]
         )
         bridge = HandoffBridge(
             loop_half=loop_half,
             structured_half=rasa_half,
-            max_rounds=3,
+            max_rounds=5,
         )
 
         try:
-            result = await bridge.run(session, {"task": "book for party of 12 in Haymarket"})
+            result = await bridge.run(session, {"task": task})
         finally:
             if server is not None:
                 server.shutdown()

@@ -1,0 +1,33 @@
+[
+  {
+    "id": "sg_1",
+    "description": "Retrieve venue_id from the venue database using available venue details such as name or address",
+    "success_criterion": "venue_id is successfully retrieved and stored in the system",
+    "estimated_tool_calls": 1,
+    "depends_on": [],
+    "assigned_half": "loop",
+    "status": "pending"
+  },
+  {
+    "id": "sg_2",
+    "description": "Update the proposal data structure to include the retrieved venue_id",
+    "success_criterion": "proposal contains a valid venue_id field",
+    "estimated_tool_calls": 1,
+    "depends_on": [
+      "sg_1"
+    ],
+    "assigned_half": "loop",
+    "status": "pending"
+  },
+  {
+    "id": "sg_3",
+    "description": "Submit the updated proposal for structured processing to verify normalization success",
+    "success_criterion": "structured processing accepts the proposal without normalization errors",
+    "estimated_tool_calls": 1,
+    "depends_on": [
+      "sg_2"
+    ],
+    "assigned_half": "loop",
+    "status": "pending"
+  }
+]

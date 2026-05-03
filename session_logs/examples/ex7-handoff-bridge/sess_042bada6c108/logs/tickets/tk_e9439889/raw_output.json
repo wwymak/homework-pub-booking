@@ -1,0 +1,25 @@
+{
+  "subgoal_id": "sg_2",
+  "success": true,
+  "final_answer": "(handoff requested)",
+  "tool_calls_made": [
+    {
+      "name": "handoff_to_structured",
+      "arguments": {
+        "reason": "Need to retrieve previous venue search parameters (near, original party size) to adjust and resubmit",
+        "context": "Venue search failed previously due to high party size; now reducing size and retrying",
+        "data": {}
+      },
+      "success": true,
+      "summary": "handoff to structured half: Need to retrieve previous venue search parameters (near, original party size) to adjust and resubmit",
+      "requires_human_approval": false
+    }
+  ],
+  "turns_used": 1,
+  "handoff_requested": true,
+  "handoff_payload": {
+    "reason": "Need to retrieve previous venue search parameters (near, original party size) to adjust and resubmit",
+    "context": "Venue search failed previously due to high party size; now reducing size and retrying",
+    "data": {}
+  }
+}

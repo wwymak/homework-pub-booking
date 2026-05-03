@@ -1,0 +1,73 @@
+{
+  "subgoal_id": "sg_1",
+  "success": true,
+  "final_answer": "(handoff requested)",
+  "tool_calls_made": [
+    {
+      "name": "venue_search",
+      "arguments": {
+        "near": "123 Main St, Edinburgh",
+        "party_size": 4,
+        "budget_max_gbp": 200
+      },
+      "success": true,
+      "summary": "venue_search(123 Main St, Edinburgh, party=4): 0 result(s)",
+      "requires_human_approval": false
+    },
+    {
+      "name": "venue_search",
+      "arguments": {
+        "near": "Edinburgh City Centre",
+        "party_size": 4,
+        "budget_max_gbp": 500
+      },
+      "success": true,
+      "summary": "venue_search(Edinburgh City Centre, party=4): 0 result(s)",
+      "requires_human_approval": false
+    },
+    {
+      "name": "handoff_to_structured",
+      "arguments": {
+        "reason": "Venue search returned no results for multiple queries; need structured analysis of available venue data",
+        "context": "Failed to retrieve venue_id via venue_search with address and city centre parameters",
+        "data": {
+          "search_attempts": [
+            {
+              "near": "123 Main St, Edinburgh",
+              "party_size": 4,
+              "budget_max_gbp": 200
+            },
+            {
+              "near": "Edinburgh City Centre",
+              "party_size": 4,
+              "budget_max_gbp": 500
+            }
+          ]
+        }
+      },
+      "success": true,
+      "summary": "handoff to structured half: Venue search returned no results for multiple queries; need structured analysis of available venue data",
+      "requires_human_approval": false
+    }
+  ],
+  "turns_used": 3,
+  "handoff_requested": true,
+  "handoff_payload": {
+    "reason": "Venue search returned no results for multiple queries; need structured analysis of available venue data",
+    "context": "Failed to retrieve venue_id via venue_search with address and city centre parameters",
+    "data": {
+      "search_attempts": [
+        {
+          "near": "123 Main St, Edinburgh",
+          "party_size": 4,
+          "budget_max_gbp": 200
+        },
+        {
+          "near": "Edinburgh City Centre",
+          "party_size": 4,
+          "budget_max_gbp": 500
+        }
+      ]
+    }
+  }
+}

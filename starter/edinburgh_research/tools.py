@@ -66,11 +66,33 @@ def venue_search(near: str, party_size: int, budget_max_gbp: int = 1000) -> Tool
             "party_size": party_size,
             "budget_max_gbp": budget_max_gbp,
         }
-        output = {
+        output: dict = {
             **input_args,
             "results": valid_venues,
             "count": len(valid_venues),
         }
+
+        if len(valid_venues) == 0:
+            all_areas = sorted({v["area"] for v in venues if v["open_now"]})
+            area_matched = [
+                v for v in venues if v["open_now"] and near.lower() in v["area"].lower()
+            ]
+            if not area_matched:
+                output["hint"] = (
+                    f"No venues found in area '{near}'. "
+                    f"Valid areas are: {', '.join(all_areas)}. "
+                    "Try one of these exact area names."
+                )
+            else:
+                max_seats = max(v["seats_available_evening"] for v in area_matched)
+                output["hint"] = (
+                    f"Venues exist in '{near}' but none seat {party_size}. "
+                    f"Largest capacity in this area: {max_seats}. "
+                    "Try relaxing ONE constraint at a time: first try a "
+                    "different area, keeping party_size=12. "
+                    f"Valid areas: {', '.join(all_areas)}. "
+                    "Do NOT hand off without a venue_id."
+                )
 
         record_tool_call("venue_search", input_args, output)
         return ToolResult(

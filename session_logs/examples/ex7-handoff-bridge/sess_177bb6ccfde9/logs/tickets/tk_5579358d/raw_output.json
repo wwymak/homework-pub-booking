@@ -1,0 +1,43 @@
+{
+  "subgoal_id": "sg_2",
+  "success": true,
+  "final_answer": "(handoff requested)",
+  "tool_calls_made": [
+    {
+      "name": "venue_search",
+      "arguments": {
+        "near": "Haymarket",
+        "party_size": 12
+      },
+      "success": true,
+      "summary": "venue_search(Haymarket, party=12): 0 result(s)",
+      "requires_human_approval": false
+    },
+    {
+      "name": "handoff_to_structured",
+      "arguments": {
+        "reason": "No venues found matching criteria",
+        "context": "Venue search for 12 people in Haymarket returned 0 results",
+        "data": {
+          "near": "Haymarket",
+          "party_size": 12,
+          "search_results": []
+        }
+      },
+      "success": true,
+      "summary": "handoff to structured half: No venues found matching criteria",
+      "requires_human_approval": false
+    }
+  ],
+  "turns_used": 2,
+  "handoff_requested": true,
+  "handoff_payload": {
+    "reason": "No venues found matching criteria",
+    "context": "Venue search for 12 people in Haymarket returned 0 results",
+    "data": {
+      "near": "Haymarket",
+      "party_size": 12,
+      "search_results": []
+    }
+  }
+}

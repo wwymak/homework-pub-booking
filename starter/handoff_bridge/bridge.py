@@ -11,6 +11,7 @@ what to do when the structured half says "no, go back and try again".
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import Literal
 
@@ -20,6 +21,8 @@ from sovereign_agent.halves.structured import StructuredHalf
 from sovereign_agent.handoff import Handoff
 from sovereign_agent.session.directory import Session
 from sovereign_agent.session.state import now_utc
+
+log = logging.getLogger(__name__)
 
 BridgeOutcome = Literal["completed", "failed", "max_rounds_exceeded"]
 
@@ -74,25 +77,38 @@ class HandoffBridge:
             last_loop = loop_result
 
             if loop_result.next_action == "complete":
-                session.mark_complete(loop_result.output)
+                # The loop thinks it's done, but in bridge mode the
+                # structured half (Rasa) must confirm before we accept.
+                # Treat this as an implicit forward handoff.
+                log.info(
+                    "bridge: loop returned 'complete' — treating as "
+                    "implicit handoff to structured half for confirmation"
+                )
                 session.append_trace_event(
                     {
-                        "event_type": "session.state_changed",
+                        "event_type": "bridge.implicit_handoff",
                         "actor": "bridge",
-                        "payload": {"from": "executing", "to": "complete", "via": "loop"},
+                        "payload": {
+                            "round": rounds,
+                            "reason": "loop returned complete; "
+                            "routing to structured half for confirmation",
+                        },
                     }
                 )
-                return BridgeResult(
-                    outcome="completed",
-                    rounds=rounds,
-                    final_half_result=loop_result,
-                    summary=f"loop completed in round {rounds}",
+                # Synthesise a handoff_payload from the loop output
+                loop_result = HalfResult(
+                    success=loop_result.success,
+                    output=loop_result.output,
+                    summary=loop_result.summary,
+                    next_action="handoff_to_structured",
+                    handoff_payload={"data": loop_result.output},
                 )
 
-            if loop_result.next_action != "handoff_to_structured":
-                session.mark_failed(
-                    {"reason": f"unexpected loop outcome: {loop_result.next_action}"}
-                )
+            if loop_result.next_action not in (
+                "handoff_to_structured",
+                "escalate",
+            ):
+                session.mark_failed(f"unexpected loop outcome: {loop_result.next_action}")
                 return BridgeResult(
                     outcome="failed",
                     rounds=rounds,
@@ -100,7 +116,46 @@ class HandoffBridge:
                     summary=f"unexpected loop outcome: {loop_result.next_action}",
                 )
 
+            if loop_result.next_action == "escalate":
+                session.mark_failed(f"loop half escalated: {loop_result.summary}")
+                return BridgeResult(
+                    outcome="failed",
+                    rounds=rounds,
+                    final_half_result=loop_result,
+                    summary=f"loop half escalated: {loop_result.summary}",
+                )
+
             handoff = build_forward_handoff(session, loop_result)
+            handoff = _try_repair_handoff(handoff, loop_result)
+
+            valid, rejection = validate_forward_handoff(handoff)
+            if not valid:
+                log.info("bridge: skipping structured half — %s", rejection)
+                session.append_trace_event(
+                    {
+                        "event_type": "bridge.handoff_rejected",
+                        "actor": "bridge",
+                        "payload": {
+                            "round": rounds,
+                            "reason": rejection,
+                        },
+                    }
+                )
+                current_input = _build_constraint_relaxation_task(loop_result, rejection)
+                session.append_trace_event(
+                    {
+                        "event_type": "session.state_changed",
+                        "actor": "bridge",
+                        "payload": {
+                            "from": "loop",
+                            "to": "loop",
+                            "round": rounds,
+                            "rejection_reason": rejection,
+                        },
+                    }
+                )
+                continue
+
             write_handoff(session, "structured", handoff)
             session.append_trace_event(
                 {
@@ -192,6 +247,72 @@ def build_forward_handoff(session: Session, loop_result: HalfResult) -> Handoff:
     )
 
 
+def _try_repair_handoff(handoff: Handoff, loop_result: HalfResult) -> Handoff:
+    """If the handoff data is missing venue_id but loop_result has it, repair."""
+    data = handoff.data
+    if isinstance(data, dict) and data.get("venue_id"):
+        return handoff
+
+    output = loop_result.output or {}
+    venue_id = output.get("venue_id")
+    if not venue_id:
+        return handoff
+
+    log.info("bridge: repairing handoff — injecting venue_id=%s from loop output", venue_id)
+    repaired_data = dict(data) if isinstance(data, dict) else {}
+    repaired_data["venue_id"] = venue_id
+    for key in ("date", "time", "party_size", "deposit", "area", "name"):
+        if key in output and key not in repaired_data:
+            repaired_data[key] = output[key]
+
+    handoff.data = repaired_data
+    return handoff
+
+
+def validate_forward_handoff(handoff: Handoff) -> tuple[bool, str]:
+    """Check that a forward handoff carries enough data for the structured half.
+
+    Returns ``(True, "")`` when valid, ``(False, reason)`` otherwise.
+    """
+    data = handoff.data
+    if not isinstance(data, dict):
+        return False, "handoff data is not a dict"
+    venue_id = data.get("venue_id")
+    if not venue_id or (isinstance(venue_id, str) and not venue_id.strip()):
+        return False, (
+            "missing venue_id in handoff data. You MUST include the "
+            "venue_id from your search results in the handoff data dict. "
+            "If no venues were found, try a different area or relax "
+            "party_size — but only one constraint at a time."
+        )
+    return True, ""
+
+
+def _build_constraint_relaxation_task(loop_result: HalfResult, rejection: str) -> dict:
+    """Build a task dict that tells the loop half to retry with relaxed constraints."""
+    return {
+        "task": (
+            f"The previous search returned no usable venue. {rejection}\n\n"
+            "RULES FOR RETRYING:\n"
+            "1. Relax ONE constraint at a time. Keep the original party_size "
+            "(12) and try different areas first.\n"
+            "2. Valid venue areas: Haymarket, Old Town, Duddingston, Tollcross, "
+            "New Town. Use these EXACT names — 'Edinburgh' is NOT a valid area.\n"
+            "3. Only reduce party_size as a LAST RESORT after trying all areas.\n"
+            "4. When you find a venue, you MUST call handoff_to_structured with "
+            "the venue data INCLUDING venue_id, date, time, party_size, and "
+            "deposit in the 'data' field. Do NOT hand off without venue_id.\n"
+            "5. Do NOT call complete_task — that is the structured half's job."
+        ),
+        "context": {
+            "prior_result": loop_result.output,
+            "rejection_reason": rejection,
+            "retry": True,
+            "valid_areas": ["Haymarket", "Old Town", "Duddingston", "Tollcross", "New Town"],
+        },
+    }
+
+
 def build_reverse_task(loop_result: HalfResult, struct_result: HalfResult) -> dict:
     """Build the task dict to pass back to the loop half after a reject."""
     reason = struct_result.output.get("reason") or struct_result.summary
@@ -214,4 +335,5 @@ __all__ = [
     "HandoffBridge",
     "build_forward_handoff",
     "build_reverse_task",
+    "validate_forward_handoff",
 ]
