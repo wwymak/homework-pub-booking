@@ -1,0 +1,22 @@
+[
+  {
+    "id": "sg_1",
+    "description": "Search for available venues in Haymarket on 2026-04-25 at 19:30 for 12 people",
+    "success_criterion": "List of available venues returned with capacity for 12",
+    "estimated_tool_calls": 1,
+    "depends_on": [],
+    "assigned_half": "loop",
+    "status": "pending"
+  },
+  {
+    "id": "sg_2",
+    "description": "Book the first available venue from the search results",
+    "success_criterion": "Booking confirmation received with venue details",
+    "estimated_tool_calls": 1,
+    "depends_on": [
+      "sg_1"
+    ],
+    "assigned_half": "loop",
+    "status": "pending"
+  }
+]

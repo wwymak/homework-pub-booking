@@ -110,8 +110,12 @@ reject, since the action server enforced the ex6 limit.
 - **Real Rasa action server:** `rasa_project/actions/actions.py` reads
   `MAX_PARTY_SIZE_FOR_AUTO_BOOKING` from `os.environ.get("MAX_PARTY_SIZE", "8")`.
   Defaults to 8 (ex6 behaviour) when unset.
-- **Makefile:** The `ex7-real` target sets `MAX_PARTY_SIZE=16` in the
-  environment so the real Rasa action server accepts larger parties.
+- **Makefile:** Added `make rasa-actions-ex7` target that starts the action
+  server with `MAX_PARTY_SIZE=16`. The `ex7-real` target also sets the env var
+  for the bridge process. **Important:** the env var must be set on the *action
+  server* process, not just the bridge -- the action server is a separate
+  process (Terminal 1) that validates bookings. For real-mode ex7, use
+  `make rasa-actions-ex7` instead of `make rasa-actions`.
 - **Ex7 run.py:** Passes `max_party_size=16` to `spawn_mock_rasa()` for offline
   mode.
 
@@ -169,7 +173,7 @@ also fails.
 | `starter/rasa_half/run.py` | Added `enable_trace_streaming(session)` |
 | `starter/voice_pipeline/run.py` | Added `enable_trace_streaming(session)` |
 | `rasa_project/actions/actions.py` | `MAX_PARTY_SIZE_FOR_AUTO_BOOKING` reads from `MAX_PARTY_SIZE` env var |
-| `Makefile` | `ex7-real` target sets `MAX_PARTY_SIZE=16` |
+| `Makefile` | `ex7-real` target sets `MAX_PARTY_SIZE=16`; new `rasa-actions-ex7` target for action server with higher limit |
 
 ## Tests Added
 

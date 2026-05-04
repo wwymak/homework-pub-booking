@@ -1,0 +1,33 @@
+[
+  {
+    "id": "sg_1",
+    "description": "Search for venues with a reduced party size (e.g., 10) to find a suitable option",
+    "success_criterion": "venue_search returns at least one venue",
+    "estimated_tool_calls": 1,
+    "depends_on": [],
+    "assigned_half": "loop",
+    "status": "pending"
+  },
+  {
+    "id": "sg_2",
+    "description": "Calculate cost for the selected venue",
+    "success_criterion": "cost calculation completes successfully",
+    "estimated_tool_calls": 1,
+    "depends_on": [
+      "sg_1"
+    ],
+    "assigned_half": "loop",
+    "status": "pending"
+  },
+  {
+    "id": "sg_3",
+    "description": "Hand off corrected proposal to structured half for processing",
+    "success_criterion": "handoff_to_structured is successfully executed",
+    "estimated_tool_calls": 1,
+    "depends_on": [
+      "sg_2"
+    ],
+    "assigned_half": "structured",
+    "status": "pending"
+  }
+]

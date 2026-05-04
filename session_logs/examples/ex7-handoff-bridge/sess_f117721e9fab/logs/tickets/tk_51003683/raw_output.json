@@ -1,0 +1,33 @@
+[
+  {
+    "id": "sg_1",
+    "description": "Search for a venue with deposit not exceeding \u00a3300",
+    "success_criterion": "Venue search returns at least one venue with deposit <= \u00a3300",
+    "estimated_tool_calls": 1,
+    "depends_on": [],
+    "assigned_half": "loop",
+    "status": "pending"
+  },
+  {
+    "id": "sg_2",
+    "description": "Calculate the total cost for the selected venue to confirm deposit is within limit",
+    "success_criterion": "Calculated deposit amount is <= \u00a3300",
+    "estimated_tool_calls": 1,
+    "depends_on": [
+      "sg_1"
+    ],
+    "assigned_half": "loop",
+    "status": "pending"
+  },
+  {
+    "id": "sg_3",
+    "description": "Hand off the corrected booking details to the structured half for processing",
+    "success_criterion": "Handoff_to_structured confirms successful submission",
+    "estimated_tool_calls": 1,
+    "depends_on": [
+      "sg_2"
+    ],
+    "assigned_half": "structured",
+    "status": "pending"
+  }
+]

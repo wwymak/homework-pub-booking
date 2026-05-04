@@ -1,0 +1,99 @@
+{
+  "subgoal_id": "sg_2",
+  "success": false,
+  "final_answer": "(max_turns=8 exhausted without final answer)",
+  "tool_calls_made": [
+    {
+      "name": "calculate_cost",
+      "arguments": {
+        "venue_id": "V123",
+        "party_size": 10,
+        "duration_hours": 3,
+        "catering_tier": "bar_snacks"
+      },
+      "success": false,
+      "summary": "calculate_cost(V123): venue not found",
+      "requires_human_approval": false
+    },
+    {
+      "name": "venue_search",
+      "arguments": {
+        "near": "Princes Street",
+        "party_size": 10,
+        "budget_max_gbp": 200
+      },
+      "success": true,
+      "summary": "venue_search(Princes Street, party=10): 0 result(s)",
+      "requires_human_approval": false
+    },
+    {
+      "name": "venue_search",
+      "arguments": {
+        "near": "Haymarket",
+        "party_size": 10,
+        "budget_max_gbp": 200
+      },
+      "success": true,
+      "summary": "venue_search(Haymarket, party=10): 0 result(s)",
+      "requires_human_approval": false
+    },
+    {
+      "name": "venue_search",
+      "arguments": {
+        "near": "New Town",
+        "party_size": 10,
+        "budget_max_gbp": 200
+      },
+      "success": true,
+      "summary": "venue_search(New Town, party=10): 0 result(s)",
+      "requires_human_approval": false
+    },
+    {
+      "name": "venue_search",
+      "arguments": {
+        "near": "Old Town",
+        "party_size": 10,
+        "budget_max_gbp": 200
+      },
+      "success": true,
+      "summary": "venue_search(Old Town, party=10): 0 result(s)",
+      "requires_human_approval": false
+    },
+    {
+      "name": "venue_search",
+      "arguments": {
+        "near": "Tollcross",
+        "party_size": 10,
+        "budget_max_gbp": 200
+      },
+      "success": true,
+      "summary": "venue_search(Tollcross, party=10): 0 result(s)",
+      "requires_human_approval": false
+    },
+    {
+      "name": "venue_search",
+      "arguments": {
+        "near": "New Town",
+        "party_size": 8,
+        "budget_max_gbp": 200
+      },
+      "success": true,
+      "summary": "venue_search(New Town, party=8): 0 result(s)",
+      "requires_human_approval": false
+    },
+    {
+      "name": "venue_search",
+      "arguments": {
+        "near": "Old Town",
+        "party_size": 12,
+        "budget_max_gbp": 200
+      },
+      "success": true,
+      "summary": "venue_search(Old Town, party=12): 0 result(s)",
+      "requires_human_approval": false
+    }
+  ],
+  "turns_used": 8,
+  "handoff_requested": false,
+  "handoff_payload": null
+}

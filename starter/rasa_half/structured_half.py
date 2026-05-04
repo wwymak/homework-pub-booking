@@ -445,6 +445,7 @@ class _MockRasaHandler(BaseHTTPRequestHandler):
         party = booking.get("party_size")
         deposit = booking.get("deposit_gbp", 0)
         max_party = getattr(self.server, "max_party_size", 8)
+        max_deposit = getattr(self.server, "max_deposit_gbp", 300)
 
         if not party:
             response = [
@@ -467,7 +468,7 @@ class _MockRasaHandler(BaseHTTPRequestHandler):
                     "custom": {"action": "rejected", "reason": "party_too_large"},
                 }
             ]
-        elif deposit > 300:
+        elif deposit > max_deposit:
             response = [
                 {
                     "text": "Sorry, we can't accept this booking. Reason: deposit_too_high",
@@ -500,15 +501,18 @@ def spawn_mock_rasa(
     port: int = 5905,
     *,
     max_party_size: int = 8,
+    max_deposit_gbp: int = 300,
 ) -> tuple[ThreadingHTTPServer, threading.Thread, str]:
     """Spawn a mock Rasa REST webhook server for offline testing.
 
     Args:
         port: Port to bind on localhost.
         max_party_size: Maximum party size the mock will auto-approve.
+        max_deposit_gbp: Maximum deposit (GBP) the mock will auto-approve.
     """
     server = ThreadingHTTPServer(("127.0.0.1", port), _MockRasaHandler)
     server.max_party_size = max_party_size  # type: ignore[attr-defined]
+    server.max_deposit_gbp = max_deposit_gbp  # type: ignore[attr-defined]
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     url = f"http://127.0.0.1:{port}/webhooks/rest/webhook"

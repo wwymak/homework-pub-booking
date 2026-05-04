@@ -61,7 +61,7 @@ help: ## Structured help — your actual starting point
 	@echo ''
 	@echo '  ${GREEN}Ex7${RESET}  — Handoff bridge (loop ↔ structured round-trip)'
 	@echo '      ${CYAN}make ex7${RESET}                 offline scripted round-trip'
-	@echo '      ${CYAN}make ex7-real${RESET}            real LLM in the loop'
+	@echo '      ${CYAN}make ex7-real${RESET}            real LLM + Rasa (use rasa-actions-ex7 for action server)'
 	@echo ''
 	@echo '  ${GREEN}Ex8${RESET}  — Voice pipeline ${DIM}${RESET}'
 	@echo '      ${CYAN}make ex8-text${RESET}            text mode (free, no mic)'
@@ -232,6 +232,12 @@ rasa-actions: ## Terminal 1 — run the Rasa action server on :5055
 	@echo "▶ Starting Rasa action server (port 5055). Ctrl-C to stop."
 	@cd rasa_project && OPENAI_API_KEY="$${NEBIUS_KEY}" $(UV) run rasa run actions -p 5055
 
+.PHONY: rasa-actions-ex7
+rasa-actions-ex7: ## Terminal 1 (Ex7) — action server with relaxed limits (party=16, deposit=400)
+	$(_rasa_preflight)
+	@echo "▶ Starting Rasa action server (port 5055, MAX_PARTY_SIZE=16, MAX_DEPOSIT=400). Ctrl-C to stop."
+	@cd rasa_project && MAX_PARTY_SIZE=16 MAX_DEPOSIT_FOR_AUTO_BOOKING_GBP=400 OPENAI_API_KEY="$${NEBIUS_KEY}" $(UV) run rasa run actions -p 5055
+
 .PHONY: rasa-serve
 rasa-serve: ## Terminal 2 — run the Rasa server on :5005 (trains if needed)
 	$(_rasa_preflight)
@@ -308,7 +314,7 @@ ex7: ## Run Ex7 (handoff bridge) end-to-end
 
 .PHONY: ex7-real
 ex7-real: ## Run Ex7 (handoff bridge) with real LLM (uses tokens!)
-	@MAX_PARTY_SIZE=16 $(UV) run python -m starter.handoff_bridge.run --real
+	@MAX_PARTY_SIZE=16 MAX_DEPOSIT_FOR_AUTO_BOOKING_GBP=400 $(UV) run python -m starter.handoff_bridge.run --real
 
 .PHONY: ex8-text
 ex8-text: ## Run Ex8 (voice pipeline) in TEXT-ONLY mode — no Speechmatics needed
