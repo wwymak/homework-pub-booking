@@ -116,3 +116,53 @@ class TestValidateForwardHandoff:
         handoff = build_forward_handoff(session, loop_result)
         ok, reason = validate_forward_handoff(handoff)
         assert not ok
+
+    def test_repair_extracts_from_complete_task_tool_calls(self) -> None:
+        """When the LLM calls complete_task, venue data is in tool call args."""
+        from starter.handoff_bridge.bridge import _try_repair_handoff
+
+        session = _make_session()
+        loop_result = HalfResult(
+            success=True,
+            output={
+                "final_answer": "Booked The Royal Oak",
+                "executor_results": [
+                    {
+                        "subgoal_id": "sg_1",
+                        "success": True,
+                        "final_answer": "",
+                        "turns_used": 3,
+                        "tool_calls_made": [
+                            {
+                                "name": "venue_search",
+                                "arguments": {"near": "Old Town", "party_size": 12},
+                                "success": True,
+                                "summary": "1 result(s)",
+                            },
+                            {
+                                "name": "complete_task",
+                                "arguments": {
+                                    "result": {
+                                        "venue_id": "The Royal Oak",
+                                        "date": "2026-04-25",
+                                        "time": "19:30",
+                                        "party_size": 12,
+                                    }
+                                },
+                                "success": True,
+                                "summary": "session marked complete",
+                            },
+                        ],
+                    }
+                ],
+            },
+            summary="found royal_oak",
+            next_action="handoff_to_structured",
+            handoff_payload={"data": {"final_answer": "Booked The Royal Oak"}},
+        )
+        handoff = build_forward_handoff(session, loop_result)
+        repaired = _try_repair_handoff(handoff, loop_result)
+        ok, _ = validate_forward_handoff(repaired)
+        assert ok
+        assert repaired.data["venue_id"] == "The Royal Oak"
+        assert repaired.data["party_size"] == 12

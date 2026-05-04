@@ -95,13 +95,18 @@ class HandoffBridge:
                         },
                     }
                 )
-                # Synthesise a handoff_payload from the loop output
+                # Synthesise a handoff_payload from the loop output.
+                # When the LLM calls complete_task, structured booking
+                # data is buried in tool call history, not at the top
+                # level — extract it so the handoff carries real data.
+                extracted = _extract_booking_from_tool_calls(loop_result.output or {})
+                handoff_data = extracted if extracted.get("venue_id") else loop_result.output
                 loop_result = HalfResult(
                     success=loop_result.success,
                     output=loop_result.output,
                     summary=loop_result.summary,
                     next_action="handoff_to_structured",
-                    handoff_payload={"data": loop_result.output},
+                    handoff_payload={"data": handoff_data},
                 )
 
             if loop_result.next_action not in (
@@ -247,6 +252,59 @@ def build_forward_handoff(session: Session, loop_result: HalfResult) -> Handoff:
     )
 
 
+def _extract_booking_from_tool_calls(output: dict) -> dict:
+    """Extract structured booking data from executor tool call history.
+
+    When the LLM calls ``complete_task`` instead of ``handoff_to_structured``,
+    the venue data ends up buried inside ``executor_results[*].tool_calls_made``
+    rather than at the top level of ``output``.
+    """
+    booking: dict = {}
+    for er in output.get("executor_results") or []:
+        for tc in er.get("tool_calls_made") or []:
+            args = tc.get("arguments") or {}
+            name = tc.get("name", "")
+
+            if name == "complete_task":
+                result = args.get("result") or args
+                if isinstance(result, dict):
+                    for k in (
+                        "venue_id",
+                        "date",
+                        "time",
+                        "party_size",
+                        "deposit",
+                        "deposit_required_gbp",
+                        "area",
+                        "name",
+                    ):
+                        if k in result and k not in booking:
+                            booking[k] = result[k]
+
+            elif name == "handoff_to_structured":
+                data = args.get("data") or {}
+                if isinstance(data, dict):
+                    for k in (
+                        "venue_id",
+                        "date",
+                        "time",
+                        "party_size",
+                        "deposit",
+                        "deposit_required_gbp",
+                        "area",
+                        "name",
+                    ):
+                        if k in data and k not in booking:
+                            booking[k] = data[k]
+
+            elif name == "calculate_cost":
+                for k in ("venue_id", "deposit_required_gbp", "total_cost_gbp"):
+                    if k in args and k not in booking:
+                        booking[k] = args[k]
+
+    return booking
+
+
 def _try_repair_handoff(handoff: Handoff, loop_result: HalfResult) -> Handoff:
     """If the handoff data is missing venue_id but loop_result has it, repair."""
     data = handoff.data
@@ -254,16 +312,25 @@ def _try_repair_handoff(handoff: Handoff, loop_result: HalfResult) -> Handoff:
         return handoff
 
     output = loop_result.output or {}
+
+    # First try top-level output keys
     venue_id = output.get("venue_id")
+    source_data = output
+
+    # If not at top level, dig into executor tool call history
+    if not venue_id:
+        source_data = _extract_booking_from_tool_calls(output)
+        venue_id = source_data.get("venue_id")
+
     if not venue_id:
         return handoff
 
     log.info("bridge: repairing handoff — injecting venue_id=%s from loop output", venue_id)
     repaired_data = dict(data) if isinstance(data, dict) else {}
     repaired_data["venue_id"] = venue_id
-    for key in ("date", "time", "party_size", "deposit", "area", "name"):
-        if key in output and key not in repaired_data:
-            repaired_data[key] = output[key]
+    for key in ("date", "time", "party_size", "deposit", "deposit_required_gbp", "area", "name"):
+        if key in source_data and key not in repaired_data:
+            repaired_data[key] = source_data[key]
 
     handoff.data = repaired_data
     return handoff

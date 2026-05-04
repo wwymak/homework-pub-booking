@@ -1,0 +1,21 @@
+{
+  "ticket_id": "tk_944edde5",
+  "operation": "planner.plan",
+  "started_at": "2026-05-04T15:59:09.417702+00:00",
+  "completed_at": "2026-05-04T15:59:24.370660+00:00",
+  "duration_ms": 14952,
+  "outputs": [
+    {
+      "path": "/Users/wendy.mak/work/experiments/ai-perf-course-hw-pub-booking/session_logs/examples/ex7-handoff-bridge/sess_6f3a0e0f9d5c/logs/tickets/tk_944edde5/raw_output.json",
+      "sha256": "e5dd7da64f3793e8a85911c63cd066d5b21cd5dcdee3e1b846740354df6ce915",
+      "size_bytes": 635,
+      "content_type": "application/json"
+    }
+  ],
+  "metrics": {
+    "num_subgoals": 2,
+    "llm_tokens_in": 286,
+    "llm_tokens_out": 2256,
+    "llm_model": "Qwen/Qwen3-Next-80B-A3B-Thinking"
+  }
+}

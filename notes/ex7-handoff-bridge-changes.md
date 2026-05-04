@@ -149,16 +149,26 @@ codes:
 
 ### 9. Handoff validation and repair
 
-**What:** Two new functions in the bridge:
+**What:** Three functions in the bridge for data extraction and validation:
+- `_extract_booking_from_tool_calls(output)` -- digs into
+  `executor_results[*].tool_calls_made` to find venue data from `complete_task`,
+  `handoff_to_structured`, or `calculate_cost` tool call arguments
 - `validate_forward_handoff(handoff)` -- returns `(bool, reason)` checking for
   valid `venue_id`
 - `_try_repair_handoff(handoff, loop_result)` -- extracts venue data from loop
-  output if the handoff payload is empty
+  output (top-level or via tool call history) if the handoff payload is empty
 
-**Why:** LLMs frequently put booking data in the wrong place (in the output dict
-instead of the handoff payload) or omit fields entirely. Rather than crashing,
-the bridge attempts repair first, then validates, and only retries if repair
-also fails.
+**Why:** When the LLM calls `complete_task` instead of `handoff_to_structured`,
+the sovereign_agent framework puts venue data inside the tool call arguments
+(`executor_results[*].tool_calls_made[*].arguments`), NOT at the top level of
+`loop_result.output`. The top level only contains `final_answer` (text) and
+`executor_results` (metadata). Without deep extraction, the bridge sees no
+`venue_id` and rejects the handoff even though the data exists.
+
+The implicit handoff path (`complete` -> `handoff_to_structured`) now runs
+`_extract_booking_from_tool_calls` to build the handoff payload from the tool
+call history. The repair function serves as a fallback for cases where the
+initial extraction misses data.
 
 ## Files Modified
 
@@ -169,11 +179,11 @@ also fails.
 | `starter/_trace_stream.py` | New file: `format_trace_event`, `enable_trace_streaming` |
 | `starter/edinburgh_research/tools.py` | Zero-result hints with valid area names, area-vs-capacity differentiation |
 | `starter/edinburgh_research/run.py` | Added `enable_trace_streaming(session)` |
-| `starter/rasa_half/structured_half.py` | `_MockRasaHandler` reads `max_party_size` from server; `spawn_mock_rasa` accepts `max_party_size` kwarg |
+| `starter/rasa_half/structured_half.py` | `_MockRasaHandler` reads `max_party_size` and `max_deposit_gbp` from server; `spawn_mock_rasa` accepts both as kwargs |
 | `starter/rasa_half/run.py` | Added `enable_trace_streaming(session)` |
 | `starter/voice_pipeline/run.py` | Added `enable_trace_streaming(session)` |
-| `rasa_project/actions/actions.py` | `MAX_PARTY_SIZE_FOR_AUTO_BOOKING` reads from `MAX_PARTY_SIZE` env var |
-| `Makefile` | `ex7-real` target sets `MAX_PARTY_SIZE=16`; new `rasa-actions-ex7` target for action server with higher limit |
+| `rasa_project/actions/actions.py` | `MAX_PARTY_SIZE_FOR_AUTO_BOOKING` reads from `MAX_PARTY_SIZE` env var; `MAX_DEPOSIT_FOR_AUTO_BOOKING_GBP` reads from `MAX_DEPOSIT_FOR_AUTO_BOOKING_GBP` env var |
+| `Makefile` | `ex7-real` target sets `MAX_PARTY_SIZE=16`; new `rasa-actions-ex7` target sets both `MAX_PARTY_SIZE=16` and `MAX_DEPOSIT_FOR_AUTO_BOOKING_GBP=400` |
 
 ## Tests Added
 
