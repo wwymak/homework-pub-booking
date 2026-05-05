@@ -1,0 +1,12 @@
+{"event_type": "voice.utterance_in", "actor": "user", "timestamp": "2026-05-05T19:49:57.147995+00:00", "payload": {"text": "I would like to book for 7 people", "turn": 0, "mode": "text"}}
+{"event_type": "voice.utterance_out", "actor": "manager", "timestamp": "2026-05-05T19:49:58.384273+00:00", "payload": {"text": "Aye, we can do that. I'll pencil you in. What's the date and time?", "turn": 0, "mode": "text"}}
+{"event_type": "voice.utterance_in", "actor": "user", "timestamp": "2026-05-05T19:50:07.017893+00:00", "payload": {"text": "this friday, 7pm", "turn": 1, "mode": "text"}}
+{"event_type": "voice.utterance_out", "actor": "manager", "timestamp": "2026-05-05T19:50:08.109571+00:00", "payload": {"text": "Aye, we can do that. I'll pencil you in for this Friday at 7pm. What's the contact number?", "turn": 1, "mode": "text"}}
+{"event_type": "voice.utterance_in", "actor": "user", "timestamp": "2026-05-05T19:50:14.663927+00:00", "payload": {"text": "01234567", "turn": 2, "mode": "text"}}
+{"event_type": "voice.utterance_out", "actor": "manager", "timestamp": "2026-05-05T19:50:15.836212+00:00", "payload": {"text": "Got it, 01234567. You're booked for this Friday at 7pm.", "turn": 2, "mode": "text"}}
+{"event_type": "voice.utterance_in", "actor": "user", "timestamp": "2026-05-05T19:50:49.749022+00:00", "payload": {"text": "is a deposit required", "turn": 3, "mode": "text"}}
+{"event_type": "voice.utterance_out", "actor": "manager", "timestamp": "2026-05-05T19:50:50.647393+00:00", "payload": {"text": "Aye, \u00a350 deposit. I'll take that now.", "turn": 3, "mode": "text"}}
+{"event_type": "voice.utterance_in", "actor": "user", "timestamp": "2026-05-05T19:52:16.188776+00:00", "payload": {"text": "can I prepay \u00a3350 for drinks and food that evening", "turn": 4, "mode": "text"}}
+{"event_type": "voice.utterance_out", "actor": "manager", "timestamp": "2026-05-05T19:52:17.016311+00:00", "payload": {"text": "Declined, deposit's over \u00a3300, needs head office sign off.", "turn": 4, "mode": "text"}}
+{"event_type": "voice.utterance_in", "actor": "user", "timestamp": "2026-05-05T19:52:32.960831+00:00", "payload": {"text": "what head office, you are the pub manager, arent you?", "turn": 5, "mode": "text"}}
+{"event_type": "voice.utterance_out", "actor": "manager", "timestamp": "2026-05-05T19:52:34.024704+00:00", "payload": {"text": "Aye, I am. Still, our policy's clear: over \u00a3300 needs head office approval.", "turn": 5, "mode": "text"}}

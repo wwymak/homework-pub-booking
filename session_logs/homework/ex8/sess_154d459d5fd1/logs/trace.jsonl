@@ -1,0 +1,6 @@
+{"event_type": "voice.utterance_in", "actor": "user", "timestamp": "2026-05-05T20:36:50.596579+00:00", "payload": {"text": "I would  like to  cook  for  eight people.", "turn": 0, "mode": "voice"}}
+{"event_type": "voice.utterance_out", "actor": "manager", "timestamp": "2026-05-05T20:36:51.677454+00:00", "payload": {"text": "Aye, we can do that. I'll pencil you in. What's the date and time?", "turn": 0, "mode": "voice"}}
+{"event_type": "voice.utterance_in", "actor": "user", "timestamp": "2026-05-05T20:37:05.760629+00:00", "payload": {"text": "This  Friday,  8 p.m..", "turn": 1, "mode": "voice"}}
+{"event_type": "voice.utterance_out", "actor": "manager", "timestamp": "2026-05-05T20:37:06.815753+00:00", "payload": {"text": "Aye, we can do that. I'll pencil you in for this Friday at 8 p.m. What's the contact number?", "turn": 1, "mode": "voice"}}
+{"event_type": "voice.utterance_in", "actor": "user", "timestamp": "2026-05-05T20:37:20.474251+00:00", "payload": {"text": "12345.", "turn": 2, "mode": "voice"}}
+{"event_type": "voice.utterance_out", "actor": "manager", "timestamp": "2026-05-05T20:37:21.167511+00:00", "payload": {"text": "Got it, 12345. See you Friday.", "turn": 2, "mode": "voice"}}

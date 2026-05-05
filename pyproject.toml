@@ -18,7 +18,8 @@ dependencies = [
 [project.optional-dependencies]
 voice = [
   # Speechmatics real-time Python client (STT).
-  "speechmatics-python >= 1.11.0",
+  "speechmatics-rt",
+  "speechmatics-tts",
   # Rime.ai has no official Python SDK; we call the REST API directly.
   "httpx >= 0.27.0",
   # Mic capture + audio playback (sounddevice uses PortAudio).

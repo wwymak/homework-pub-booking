@@ -268,15 +268,15 @@ make setup-voice
 # Then: System Settings → Privacy & Security → Microphone → grant terminal access
 ```
 
-**Get API keys** from https://portal.speechmatics.com and https://rime.ai.
-Add `SPEECHMATICS_KEY` and `RIME_API_KEY` to `.env`.
+**Get an API key** from https://portal.speechmatics.com.
+Add `SPEECHMATICS_API_KEY` to `.env`.
 
 Implement `run_voice_mode` in `starter/voice_pipeline/voice_loop.py`:
 
 - Mic capture via `sounddevice`
-- Speechmatics real-time STT over websocket
+- Speechmatics real-time STT over websocket (`speechmatics-rt`)
 - Pub-manager reply from Llama-3.3 via `manager_persona.py`
-- Rime Arcana TTS → MP3 → pydub decode → sounddevice playback
+- Speechmatics TTS → raw PCM → sounddevice playback
 
 **Run:**
 
@@ -443,12 +443,11 @@ problem from those.
 |---|---|---|
 | `NEBIUS_KEY` | All LLM calls | Yes — free sign-up at tokenfactory.nebius.com |
 | `RASA_PRO_LICENSE` | Ex6 real Rasa server | Yes — developer edition at rasa.com |
-| `SPEECHMATICS_KEY` | Ex8 voice STT | Yes — 2h audio/month at portal.speechmatics.com |
-| `RIME_API_KEY` | Ex8 voice TTS | Yes — rime.ai |
+| `SPEECHMATICS_API_KEY` | Ex8 voice STT + TTS | Yes — 2h audio/month at portal.speechmatics.com |
 
 **Minimum for Ex5+Ex7+Ex9:** just `NEBIUS_KEY`.
 **Add for Ex6:** `RASA_PRO_LICENSE`.
-**Add for Ex8 voice:** `SPEECHMATICS_KEY` + `RIME_API_KEY`.
+**Add for Ex8 voice:** `SPEECHMATICS_API_KEY`.
 
 Total LLM spend for the whole homework: under £0.50 if you run every
 `-real` command 3-5 times.

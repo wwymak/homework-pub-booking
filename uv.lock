@@ -985,7 +985,8 @@ educator = [
     { name = "pydub" },
     { name = "sounddevice" },
     { name = "sovereign-agent", extra = ["rasa"] },
-    { name = "speechmatics-python" },
+    { name = "speechmatics-rt" },
+    { name = "speechmatics-tts" },
 ]
 rasa = [
     { name = "sovereign-agent", extra = ["rasa"] },
@@ -995,7 +996,8 @@ voice = [
     { name = "numpy" },
     { name = "pydub" },
     { name = "sounddevice" },
-    { name = "speechmatics-python" },
+    { name = "speechmatics-rt" },
+    { name = "speechmatics-tts" },
 ]
 
 [package.dev-dependencies]
@@ -1019,7 +1021,8 @@ requires-dist = [
     { name = "sounddevice", marker = "extra == 'voice'", specifier = ">=0.4.6" },
     { name = "sovereign-agent", specifier = "==0.2.0" },
     { name = "sovereign-agent", extras = ["rasa"], marker = "extra == 'rasa'", specifier = "==0.2.0" },
-    { name = "speechmatics-python", marker = "extra == 'voice'", specifier = ">=1.11.0" },
+    { name = "speechmatics-rt", marker = "extra == 'voice'" },
+    { name = "speechmatics-tts", marker = "extra == 'voice'" },
 ]
 provides-extras = ["voice", "rasa", "educator"]
 
@@ -2064,15 +2067,6 @@ wheels = [
 ]
 
 [[package]]
-name = "polling2"
-version = "0.5.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/04/9d/6a560ab95e1b92dfce97321d8ffc9f20d352fa4b12a91525d4c575df1c74/polling2-0.5.0.tar.gz", hash = "sha256:90b7da82cf7adbb48029724d3546af93f21ab6e592ec37c8c4619aedd010e342", size = 6549, upload-time = "2021-07-19T18:06:54.951Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a3/de/e5bf2556ebd6db12590788207575c7c75b1de62f5ddc8b4916b668e04e6b/polling2-0.5.0-py2.py3-none-any.whl", hash = "sha256:ad86d56fbd7502f0856cac2d0109d595c18fa6c7fb12c88cee5e5d16c17286c1", size = 6431, upload-time = "2021-07-19T18:06:53.681Z" },
-]
-
-[[package]]
 name = "portalocker"
 version = "2.10.1"
 source = { registry = "https://pypi.org/simple" }
@@ -3101,18 +3095,28 @@ rasa = [
 ]
 
 [[package]]
-name = "speechmatics-python"
-version = "1.11.0"
+name = "speechmatics-rt"
+version = "1.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "httpx", extra = ["http2"] },
-    { name = "polling2" },
-    { name = "toml" },
     { name = "websockets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/76/84/13fed0cc1c0ffd90dea754f982a4e02e056ae815383ec5e33204e1a1cc19/speechmatics-python-1.11.0.tar.gz", hash = "sha256:04104af9d1b108acc0627c560bd7c1de4f8f003a1376e70bae155519b47a2747", size = 56023, upload-time = "2023-08-25T09:08:34.256Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/cc/d4/51ea939b00b2e917a88fec02d8a966716d286f44090af823074a094d9e6b/speechmatics_rt-1.0.0.tar.gz", hash = "sha256:a9dffbd8e8f800e2d7362acb0244fc9ff3ec350c9d8b9c9170339c7c6ca837e1", size = 28100, upload-time = "2026-03-19T10:47:39.106Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/99/88/857985331826c90b10e99725dcf01b8e67bc3182969fc3bee66bca1c839a/speechmatics_python-1.11.0-py3-none-any.whl", hash = "sha256:b214023259cb4ea3dee4f4184bed100e5021639902e765386d56b72892788b3c", size = 38288, upload-time = "2023-08-25T09:08:32.512Z" },
+    { url = "https://files.pythonhosted.org/packages/2d/44/657b21ca91ae258980b02b680d1d339031db02473e539fb947b6cac62605/speechmatics_rt-1.0.0-py3-none-any.whl", hash = "sha256:fa368c63f07427976bbe93aaed2f6c6c59697207c52cfd05533ae09c0ce32e2e", size = 34088, upload-time = "2026-03-19T10:47:38.068Z" },
+]
+
+[[package]]
+name = "speechmatics-tts"
+version = "0.1.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "aiofiles" },
+    { name = "aiohttp" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ca/8e/8d8d39fa88f8b82f5685298e59cd311014b0b3c8f074d3812310e4f911a9/speechmatics_tts-0.1.2.tar.gz", hash = "sha256:0a6f49d05993aa1f4007ed87e31921bb3734ee8b54cc8d1affe56095faa872a7", size = 11703, upload-time = "2025-11-11T17:32:42.447Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/85/b4/1b65f88bc82a2cf8f8c222730b58fa9340e67793ab013a1c910b5a2e98b2/speechmatics_tts-0.1.2-py3-none-any.whl", hash = "sha256:b4251f7e3b9b8aab2cc451b3f8d2a87e2b1db2d5c22c8d6e6caf9c5d59be6df6", size = 13083, upload-time = "2025-11-11T17:32:40.969Z" },
 ]
 
 [[package]]
@@ -3262,15 +3266,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/fd/18/a545c4ea42af3df6effd7d13d250ba77a0a86fb20393143bbb9a92e434d4/tokenizers-0.22.2-cp39-abi3-win32.whl", hash = "sha256:a6bf3f88c554a2b653af81f3204491c818ae2ac6fbc09e76ef4773351292bc92", size = 2502363, upload-time = "2026-01-05T10:45:20.593Z" },
     { url = "https://files.pythonhosted.org/packages/65/71/0670843133a43d43070abeb1949abfdef12a86d490bea9cd9e18e37c5ff7/tokenizers-0.22.2-cp39-abi3-win_amd64.whl", hash = "sha256:c9ea31edff2968b44a88f97d784c2f16dc0729b8b143ed004699ebca91f05c48", size = 2747786, upload-time = "2026-01-05T10:45:18.411Z" },
     { url = "https://files.pythonhosted.org/packages/72/f4/0de46cfa12cdcbcd464cc59fde36912af405696f687e53a091fb432f694c/tokenizers-0.22.2-cp39-abi3-win_arm64.whl", hash = "sha256:9ce725d22864a1e965217204946f830c37876eee3b2ba6fc6255e8e903d5fcbc", size = 2612133, upload-time = "2026-01-05T10:45:17.232Z" },
-]
-
-[[package]]
-name = "toml"
-version = "0.10.2"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/be/ba/1f744cdc819428fc6b5084ec34d9b30660f6f9daaf70eead706e3203ec3c/toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f", size = 22253, upload-time = "2020-11-01T01:40:22.204Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/44/6f/7120676b6d73228c96e17f1f794d8ab046fc910d781c8d151120c3f1569e/toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b", size = 16588, upload-time = "2020-11-01T01:40:20.672Z" },
 ]
 
 [[package]]

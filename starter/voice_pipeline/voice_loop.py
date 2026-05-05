@@ -3,21 +3,19 @@
 Two modes:
   * text mode: stdin → manager → stdout. Free, no mic needed.
   * voice mode: mic → Speechmatics realtime STT → manager →
-    Rime.ai Arcana TTS → speakers.
+    Speechmatics TTS → speakers.
 
 Both modes write identical trace events so downstream grading
 doesn't care which ran.
 
 Voice mode degrades gracefully:
-  - No SPEECHMATICS_KEY        → text mode with warning
-  - No RIME_API_KEY            → voice STT, but manager replies printed not spoken
-  - speechmatics-python missing → text mode with install hint
+  - No SPEECHMATICS_API_KEY    → text mode with warning
+  - speechmatics-rt missing    → text mode with install hint
   - No mic / no playback       → attempted run; errors surface clearly
 """
 
 from __future__ import annotations
 
-import asyncio
 import os
 import sys
 import wave
@@ -78,18 +76,17 @@ async def run_text_mode(session: Session, persona: ManagerPersona, max_turns: in
 
 
 # ---------------------------------------------------------------------------
-# Voice mode — real Speechmatics STT + Rime Arcana TTS
+# Voice mode — Speechmatics STT + Speechmatics TTS
 # ---------------------------------------------------------------------------
 async def run_voice_mode(session: Session, persona: ManagerPersona, max_turns: int = 6) -> None:
-    """Voice mode. Real mic capture → Speechmatics STT → manager → Rime TTS."""
+    """Voice mode. Real mic capture → Speechmatics STT → manager → Speechmatics TTS."""
 
     # ── preflight: keys + deps ─────────────────────────────────────
-    speechmatics_key = os.environ.get("SPEECHMATICS_KEY", "").strip()
-    rime_key = os.environ.get("RIME_API_KEY", "").strip()
+    speechmatics_key = os.environ.get("SPEECHMATICS_API_KEY", "").strip()
 
     if not speechmatics_key:
         print(
-            "⚠  SPEECHMATICS_KEY not set — falling back to text mode.\n"
+            "⚠  SPEECHMATICS_API_KEY not set — falling back to text mode.\n"
             "   Add to .env and re-run for real voice.",
             file=sys.stderr,
         )
@@ -98,14 +95,7 @@ async def run_voice_mode(session: Session, persona: ManagerPersona, max_turns: i
 
     try:
         import sounddevice as sd  # type: ignore[import-not-found]
-        import speechmatics  # type: ignore[import-not-found]  # noqa: F401
-        from speechmatics.client import WebsocketClient  # type: ignore[import-not-found]
-        from speechmatics.models import (  # type: ignore[import-not-found]
-            AudioSettings,
-            ConnectionSettings,
-            ServerMessageType,
-            TranscriptionConfig,
-        )
+        from speechmatics.rt import AsyncClient as RtAsyncClient  # noqa: F401
     except ImportError as e:
         print(
             f"⚠  Missing voice dep: {e.name}. Run 'make setup' with voice extra:\n"
@@ -115,14 +105,6 @@ async def run_voice_mode(session: Session, persona: ManagerPersona, max_turns: i
         )
         await run_text_mode(session, persona, max_turns=max_turns)
         return
-
-    # Rime is optional — we fall through to text-reply-only if missing
-    rime_enabled = bool(rime_key)
-    if not rime_enabled:
-        print(
-            "ℹ  RIME_API_KEY not set — manager replies will be printed, not spoken.",
-            file=sys.stderr,
-        )
 
     print(f"🎙️  Voice mode. Session: {session.session_id}")
     print(f"    Speak when prompted. Silence for {SILENCE_TIMEOUT_S}s ends a turn.")
@@ -153,16 +135,11 @@ async def run_voice_mode(session: Session, persona: ManagerPersona, max_turns: i
             user_text = await _transcribe_speechmatics(
                 audio_bytes,
                 speechmatics_key,
-                AudioSettings,
-                ConnectionSettings,
-                ServerMessageType,
-                TranscriptionConfig,
-                WebsocketClient,
             )
         except Exception as e:  # noqa: BLE001
             print(f"✗ STT failed: {e}", file=sys.stderr)
             print(
-                "   Check SPEECHMATICS_KEY (make educator-diagnostics).\n"
+                "   Check SPEECHMATICS_API_KEY (make educator-diagnostics).\n"
                 "   Free-tier has a monthly cap; 403 usually means exhausted.",
                 file=sys.stderr,
             )
@@ -199,12 +176,11 @@ async def run_voice_mode(session: Session, persona: ManagerPersona, max_turns: i
             }
         )
 
-        # ── speak reply via Rime TTS (if enabled) ──────────────────
-        if rime_enabled:
-            try:
-                await _speak_rime(manager_text, rime_key, sd)
-            except Exception as e:  # noqa: BLE001
-                print(f"   ⚠ TTS playback failed: {e} (continuing)", file=sys.stderr)
+        # ── speak reply via Speechmatics TTS ──────────────────────
+        try:
+            await _speak_speechmatics(manager_text, speechmatics_key, sd)
+        except Exception as e:  # noqa: BLE001
+            print(f"   ⚠ TTS playback failed: {e} (continuing)", file=sys.stderr)
 
     print("-" * 60)
     print(f"Conversation ended. Trace: {session.trace_path}")
@@ -280,39 +256,28 @@ def _record_until_silence(sd, session: Session, turn: int) -> bytes:
 
 
 # ---------------------------------------------------------------------------
-# Speechmatics realtime STT
+# Speechmatics realtime STT (speechmatics-rt SDK)
 # ---------------------------------------------------------------------------
 async def _transcribe_speechmatics(
     audio_bytes: bytes,
     api_key: str,
-    AudioSettings,  # noqa: N803 — class passed as arg to avoid top-level import
-    ConnectionSettings,  # noqa: N803
-    ServerMessageType,  # noqa: N803
-    TranscriptionConfig,  # noqa: N803
-    WebsocketClient,  # noqa: N803
 ) -> str:
-    """Send PCM bytes to Speechmatics realtime API, collect final transcripts.
-
-    Uses the batch-via-realtime pattern: one connection, push all bytes,
-    await final results. Simpler than true streaming for this use case.
-    """
+    """Send PCM bytes to Speechmatics RT API, collect final transcripts."""
     import io
+
+    from speechmatics.rt import (
+        AsyncClient,
+        AudioEncoding,
+        AudioFormat,
+        ServerMessageType,
+        TranscriptionConfig,
+        TranscriptResult,
+    )
 
     transcripts: list[str] = []
 
-    def _on_final(message: dict) -> None:
-        for result in message.get("results", []):
-            for alt in result.get("alternatives", []):
-                content = alt.get("content")
-                if content:
-                    transcripts.append(content)
-
-    conn_settings = ConnectionSettings(
-        url="wss://eu2.rt.speechmatics.com/v2",
-        auth_token=api_key,
-    )
-    audio_settings = AudioSettings(
-        encoding="pcm_s16le",
+    audio_format = AudioFormat(
+        encoding=AudioEncoding.PCM_S16LE,
         sample_rate=SAMPLE_RATE,
     )
     trans_config = TranscriptionConfig(
@@ -321,67 +286,40 @@ async def _transcribe_speechmatics(
         max_delay=1.5,
     )
 
-    client = WebsocketClient(conn_settings)
-    client.add_event_handler(ServerMessageType.AddTranscript, _on_final)
+    async with AsyncClient(api_key=api_key) as client:
 
-    # Speechmatics client is sync; run in executor
-    stream = io.BytesIO(audio_bytes)
+        @client.on(ServerMessageType.ADD_TRANSCRIPT)
+        def _on_final(message: dict) -> None:
+            result = TranscriptResult.from_message(message)
+            transcripts.append(result.metadata.transcript)
 
-    def _blocking_run():
-        client.run_synchronously(stream, trans_config, audio_settings)
-
-    await asyncio.get_event_loop().run_in_executor(None, _blocking_run)
+        stream = io.BytesIO(audio_bytes)
+        await client.transcribe(
+            stream,
+            transcription_config=trans_config,
+            audio_format=audio_format,
+        )
 
     return " ".join(transcripts).strip()
 
 
 # ---------------------------------------------------------------------------
-# Rime.ai Arcana TTS + playback
+# Speechmatics TTS + playback
 # ---------------------------------------------------------------------------
-async def _speak_rime(text: str, api_key: str, sd) -> None:
-    """Call Rime.ai TTS, get MP3 back, play it."""
-    import httpx
-
-    url = "https://users.rime.ai/v1/rime-tts"
-    payload = {
-        "speaker": "luna",  # an Arcana voice; change if Rime renames
-        "text": text,
-        "modelId": "arcana",
-        "audioFormat": "mp3",
-    }
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-        "Accept": "audio/mp3",
-    }
-
-    async with httpx.AsyncClient(timeout=30.0) as http:
-        resp = await http.post(url, json=payload, headers=headers)
-        if resp.status_code != 200:
-            # Rime sends JSON error for 4xx
-            raise RuntimeError(f"Rime {resp.status_code}: {resp.text[:200]}")
-        mp3_bytes = resp.content
-
-    # Decode MP3 → PCM via pydub (stdlib can't handle mp3)
-    try:
-        from io import BytesIO
-
-        from pydub import AudioSegment  # type: ignore[import-not-found]
-    except ImportError:
-        print(
-            "   (pydub not installed; can't decode mp3 for playback — "
-            "install with: uv sync --extra voice)",
-            file=sys.stderr,
-        )
-        return
-
-    segment = AudioSegment.from_file(BytesIO(mp3_bytes), format="mp3")
-    # Resample + convert to int16 mono for sounddevice
-    segment = segment.set_frame_rate(SAMPLE_RATE).set_channels(1).set_sample_width(2)
-
+async def _speak_speechmatics(text: str, api_key: str, sd) -> None:
+    """Generate speech via Speechmatics TTS and play raw PCM through speakers."""
     import numpy as np
+    from speechmatics.tts import AsyncClient, OutputFormat, Voice
 
-    samples = np.array(segment.get_array_of_samples(), dtype=np.int16)
+    async with AsyncClient(api_key=api_key) as client:
+        response = await client.generate(
+            text=text,
+            voice=Voice.THEO,
+            output_format=OutputFormat.RAW_PCM_16000,
+        )
+        pcm_bytes = await response.read()
+
+    samples = np.frombuffer(pcm_bytes, dtype=np.int16)
     sd.play(samples, samplerate=SAMPLE_RATE)
     sd.wait()
 
