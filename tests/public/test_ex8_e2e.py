@@ -145,19 +145,48 @@ def test_format_booking_utterance_handles_deposit_required_gbp_alias() -> None:
 
 @pytest.mark.asyncio
 async def test_e2e_scripted_bridge_completes_and_voice_trace_exists(tmp_path, monkeypatch) -> None:
-    """Full e2e scripted pipeline: bridge confirms, then voice trace has events."""
+    """Full e2e scripted pipeline: bridge confirms, then automated conversation produces trace."""
     sessions_dir = tmp_path / "sessions"
     sessions_dir.mkdir()
 
-    # stdin for the manager conversation (after the injected first turn)
-    monkeypatch.setattr("sys.stdin", io.StringIO("sounds good\n\n"))
+    from sovereign_agent._internal.llm_client import ChatMessage
 
-    # Avoid needing a real NEBIUS_KEY by setting a fake one and
-    # monkeypatching ManagerPersona.from_env to return a StubPersona.
+    from starter.voice_pipeline.manager_persona import ManagerTurn
+
+    class StubManager:
+        """Stub manager that asks for number then says goodbye."""
+
+        def __init__(self) -> None:
+            self.history: list[ManagerTurn] = []
+            self._turn = 0
+
+        async def respond(self, utterance: str) -> str:
+            """Return scripted manager responses."""
+            self._turn += 1
+            if self._turn == 1:
+                r = "Aye, what's the number?"
+            else:
+                r = "All sorted. Cheerio!"
+            self.history.append(ManagerTurn(user_utterance=utterance, manager_response=r))
+            return r
+
+    class StubResearcherClient:
+        """Stub LLM client for the research agent."""
+
+        async def chat(
+            self, *, model: str, messages: list, temperature: float = 0.0, max_tokens: int = 200
+        ) -> ChatMessage:
+            """Return a scripted researcher response."""
+            return ChatMessage(role="assistant", content="It's 12345678. Cheers!")
+
     monkeypatch.setenv("NEBIUS_KEY", "fake-key-for-test")
     monkeypatch.setattr(
         "starter.voice_pipeline.run_e2e.ManagerPersona.from_env",
-        staticmethod(lambda: StubPersona()),
+        staticmethod(lambda: StubManager()),
+    )
+    monkeypatch.setattr(
+        "starter.voice_pipeline.run_e2e._build_researcher_client",
+        lambda: (StubResearcherClient(), "fake"),
     )
 
     from starter.voice_pipeline.run_e2e import run_e2e
@@ -165,7 +194,6 @@ async def test_e2e_scripted_bridge_completes_and_voice_trace_exists(tmp_path, mo
     rc = await run_e2e(voice=False, real=False, sessions_dir=sessions_dir)
     assert rc == 0
 
-    # Find the session trace
     session_dirs = list(sessions_dir.iterdir())
     assert len(session_dirs) == 1
     trace_path = session_dirs[0] / "logs" / "trace.jsonl"
@@ -173,14 +201,10 @@ async def test_e2e_scripted_bridge_completes_and_voice_trace_exists(tmp_path, mo
 
     trace_text = trace_path.read_text(encoding="utf-8")
 
-    # Bridge events should be present
     assert "bridge.round_start" in trace_text
-
-    # Voice events should be present (from the manager conversation)
     assert "voice.utterance_in" in trace_text
     assert "voice.utterance_out" in trace_text
 
-    # The injected first utterance should mention Haymarket Tap
     events = [json.loads(line) for line in trace_text.strip().splitlines()]
     utterance_ins = [e for e in events if e.get("event_type") == "voice.utterance_in"]
     assert len(utterance_ins) >= 1

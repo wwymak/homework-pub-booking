@@ -36,7 +36,6 @@ from starter.edinburgh_research.tools import build_tool_registry
 from starter.handoff_bridge.bridge import BridgeResult, HandoffBridge
 from starter.rasa_half.structured_half import RasaStructuredHalf, spawn_mock_rasa
 from starter.voice_pipeline.manager_persona import ManagerPersona
-from starter.voice_pipeline.voice_loop import run_text_mode, run_voice_mode
 
 _VENUE_DISPLAY_NAMES: dict[str, str] = {
     "haymarket_tap": "Haymarket Tap",
@@ -310,6 +309,15 @@ def _build_scripted_client() -> FakeLLMClient:
     )
 
 
+def _build_researcher_client() -> tuple[OpenAICompatibleClient, str]:
+    """Build the LLM client for the research agent."""
+    client = OpenAICompatibleClient(
+        base_url="https://api.tokenfactory.nebius.com/v1/",
+        api_key_env="NEBIUS_KEY",
+    )
+    return client, "meta-llama/Llama-3.3-70B-Instruct"
+
+
 async def run_e2e(
     voice: bool = False,
     real: bool = False,
@@ -382,20 +390,23 @@ async def run_e2e(
         print("Bridge did not confirm booking — skipping voice stage.", file=sys.stderr)
         return 1
 
-    # -- Stage 2: Voice/text conversation with pub manager --
+    # -- Stage 2: Automated conversation with pub manager --
     if not os.environ.get("NEBIUS_KEY"):
         print("✗ NEBIUS_KEY not set. Run 'make verify' first.", file=sys.stderr)
         return 1
 
     persona = ManagerPersona.from_env()
-    first_utterance = format_booking_utterance(bridge_result)
-    print("\n--- Manager conversation (first utterance from research agent) ---")
-    print(f'  "{first_utterance}"')
+    researcher_client, researcher_model = _build_researcher_client()
 
-    if voice:
-        await run_voice_mode(session, persona, initial_utterance=first_utterance)
-    else:
-        await run_text_mode(session, persona, initial_utterance=first_utterance)
+    await run_automated_conversation(
+        session=session,
+        manager=persona,
+        researcher_client=researcher_client,
+        researcher_model=researcher_model,
+        bridge_result=bridge_result,
+        voice=voice,
+        max_turns=6,
+    )
 
     return 0
 
