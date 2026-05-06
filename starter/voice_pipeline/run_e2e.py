@@ -66,6 +66,44 @@ def format_booking_utterance(bridge_result: BridgeResult) -> str:
     )
 
 
+_GOODBYE_WORDS = frozenset({"goodbye", "bye", "cheerio", "cheers"})
+
+
+def _is_goodbye(text: str) -> bool:
+    """Return True if the text contains a farewell keyword."""
+    words = set(text.lower().replace(",", " ").replace(".", " ").replace("!", " ").split())
+    return bool(words & _GOODBYE_WORDS)
+
+
+def build_research_agent_prompt(bridge_result: BridgeResult) -> str:
+    """Build the research agent's system prompt from confirmed booking details."""
+    half = bridge_result.final_half_result
+    output = (half.output if half is not None else None) or {}
+    booking = output.get("booking", {})
+
+    venue_id = booking.get("venue_id", "the venue")
+    venue_name = _VENUE_DISPLAY_NAMES.get(venue_id, venue_id)
+    party_size = booking.get("party_size", "?")
+    date = booking.get("date", "?")
+    time = booking.get("time", "?")
+    deposit = booking.get("deposit_gbp") or booking.get("deposit_required_gbp", 0)
+
+    return (
+        "You are a researcher booking a pub for your team outing. You are "
+        "friendly and efficient. Keep responses short (under 30 words).\n\n"
+        "You already know these details:\n"
+        f"  - Venue: {venue_name}\n"
+        f"  - Date: {date}\n"
+        f"  - Time: {time}\n"
+        f"  - Party size: {party_size}\n"
+        f"  - Deposit: £{deposit}\n"
+        "  - Your contact number: 12345678\n\n"
+        "Answer the manager's questions using these details. When the manager "
+        "confirms the booking is done, thank them and say goodbye.\n"
+        "Do not invent information beyond what is listed above."
+    )
+
+
 _EXECUTOR_SYSTEM_PROMPT = (
     "You are the EXECUTOR of a booking research agent. Your job is to "
     "find a venue and hand it off for confirmation.\n\n"

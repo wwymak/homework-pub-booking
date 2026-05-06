@@ -185,3 +185,54 @@ async def test_e2e_scripted_bridge_completes_and_voice_trace_exists(tmp_path, mo
     utterance_ins = [e for e in events if e.get("event_type") == "voice.utterance_in"]
     assert len(utterance_ins) >= 1
     assert "Haymarket Tap" in utterance_ins[0]["payload"]["text"]
+
+
+def test_build_research_agent_prompt_includes_booking_details() -> None:
+    """Research agent prompt should contain venue, date, time, party size, deposit."""
+    from sovereign_agent.halves import HalfResult
+
+    from starter.handoff_bridge.bridge import BridgeResult
+    from starter.voice_pipeline.run_e2e import build_research_agent_prompt
+
+    bridge_result = BridgeResult(
+        outcome="completed",
+        rounds=1,
+        final_half_result=HalfResult(
+            success=True,
+            output={
+                "committed": True,
+                "booking": {
+                    "venue_id": "haymarket_tap",
+                    "date": "2026-04-25",
+                    "time": "19:30",
+                    "party_size": 6,
+                    "deposit_gbp": 111,
+                },
+                "booking_reference": "BK-A1B2C3D4",
+            },
+            summary="confirmed",
+            next_action="complete",
+        ),
+        summary="confirmed",
+    )
+
+    prompt = build_research_agent_prompt(bridge_result)
+
+    assert "Haymarket Tap" in prompt
+    assert "2026-04-25" in prompt
+    assert "19:30" in prompt
+    assert "6" in prompt
+    assert "111" in prompt
+    assert "12345678" in prompt
+
+
+def test_is_goodbye_detects_farewell_keywords() -> None:
+    """_is_goodbye should catch common farewell words."""
+    from starter.voice_pipeline.run_e2e import _is_goodbye
+
+    assert _is_goodbye("Goodbye and thanks!")
+    assert _is_goodbye("Right, bye then.")
+    assert _is_goodbye("Cheerio!")
+    assert _is_goodbye("Cheers, see you Friday.")
+    assert not _is_goodbye("I'd like to book for 6 people.")
+    assert not _is_goodbye("What time works?")
