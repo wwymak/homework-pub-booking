@@ -19,6 +19,7 @@ import sys
 from pathlib import Path
 
 from sovereign_agent._internal.llm_client import (
+    ChatMessage,
     FakeLLMClient,
     OpenAICompatibleClient,
     ScriptedResponse,
@@ -28,7 +29,7 @@ from sovereign_agent._internal.paths import user_data_dir
 from sovereign_agent.executor import DefaultExecutor
 from sovereign_agent.halves.loop import LoopHalf
 from sovereign_agent.planner import DefaultPlanner
-from sovereign_agent.session.directory import create_session
+from sovereign_agent.session.directory import Session, create_session
 
 from starter._trace_stream import enable_trace_streaming
 from starter.edinburgh_research.tools import build_tool_registry
@@ -102,6 +103,123 @@ def build_research_agent_prompt(bridge_result: BridgeResult) -> str:
         "confirms the booking is done, thank them and say goodbye.\n"
         "Do not invent information beyond what is listed above."
     )
+
+
+async def run_automated_conversation(
+    *,
+    session: Session,
+    manager,
+    researcher_client,
+    researcher_model: str,
+    bridge_result: BridgeResult,
+    voice: bool = False,
+    max_turns: int = 6,
+) -> None:
+    """Run a fully automated conversation between the research agent and the manager."""
+    from sovereign_agent.session.state import now_utc
+
+    researcher_prompt = build_research_agent_prompt(bridge_result)
+    researcher_history: list[ChatMessage] = [
+        ChatMessage(role="system", content=researcher_prompt),
+    ]
+
+    first_utterance = format_booking_utterance(bridge_result)
+
+    # Voice mode setup
+    speechmatics_key = ""
+    sd = None
+    if voice:
+        speechmatics_key = os.environ.get("SPEECHMATICS_API_KEY", "").strip()
+        if speechmatics_key:
+            try:
+                import sounddevice as _sd
+
+                sd = _sd
+            except ImportError:
+                pass
+
+    async def _speak(text: str, voice_name: str) -> None:
+        """Speak text via TTS if in voice mode."""
+        if not voice or not speechmatics_key or sd is None:
+            return
+        try:
+            import numpy as np
+            from speechmatics.tts import AsyncClient, OutputFormat, Voice
+
+            voice_enum = Voice.SARAH if voice_name == "researcher" else Voice.THEO
+            async with AsyncClient(api_key=speechmatics_key) as tts_client:
+                response = await tts_client.generate(
+                    text=text,
+                    voice=voice_enum,
+                    output_format=OutputFormat.RAW_PCM_16000,
+                )
+                pcm_bytes = await response.read()
+            samples = np.frombuffer(pcm_bytes, dtype=np.int16)
+            sd.play(samples, samplerate=16000)
+            sd.wait()
+        except Exception as e:  # noqa: BLE001
+            print(f"   ⚠ TTS failed: {e} (continuing)", file=sys.stderr)
+
+    mode = "voice" if voice else "text"
+    print("\n--- Automated conversation ---")
+
+    researcher_text = first_utterance
+    for turn_idx in range(max_turns):
+        # -- Research agent speaks --
+        label = "(injected)" if turn_idx == 0 else "(agent)"
+        print(f"\n[turn {turn_idx + 1}] researcher {label}> {researcher_text}")
+        await _speak(researcher_text, "researcher")
+
+        session.append_trace_event(
+            {
+                "event_type": "voice.utterance_in",
+                "actor": "user",
+                "timestamp": now_utc().isoformat(),
+                "payload": {"text": researcher_text, "turn": turn_idx, "mode": mode},
+            }
+        )
+
+        # -- Manager responds --
+        manager_text = await manager.respond(researcher_text)
+        print(f"   alasdair> {manager_text}")
+        await _speak(manager_text, "manager")
+
+        session.append_trace_event(
+            {
+                "event_type": "voice.utterance_out",
+                "actor": "manager",
+                "timestamp": now_utc().isoformat(),
+                "payload": {"text": manager_text, "turn": turn_idx, "mode": mode},
+            }
+        )
+
+        # Check if manager said goodbye
+        if _is_goodbye(manager_text):
+            print("   (manager ended the conversation)")
+            break
+
+        # Last turn — don't generate a researcher response
+        if turn_idx >= max_turns - 1:
+            break
+
+        # -- Research agent formulates next response via LLM --
+        researcher_history.append(ChatMessage(role="user", content=manager_text))
+        resp = await researcher_client.chat(
+            model=researcher_model,
+            messages=researcher_history,
+            temperature=0.0,
+            max_tokens=200,
+        )
+        researcher_text = (resp.content or "").strip()
+        researcher_history.append(ChatMessage(role="assistant", content=researcher_text))
+
+        # Check if researcher said goodbye
+        if _is_goodbye(researcher_text):
+            # Let the researcher's goodbye be the next turn's utterance
+            continue
+
+    print("-" * 60)
+    print(f"Conversation ended. Trace: {session.trace_path}")
 
 
 _EXECUTOR_SYSTEM_PROMPT = (

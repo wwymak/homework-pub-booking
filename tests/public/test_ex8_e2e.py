@@ -236,3 +236,92 @@ def test_is_goodbye_detects_farewell_keywords() -> None:
     assert _is_goodbye("Cheers, see you Friday.")
     assert not _is_goodbye("I'd like to book for 6 people.")
     assert not _is_goodbye("What time works?")
+
+
+@pytest.mark.asyncio
+async def test_run_automated_conversation_produces_multi_turn_trace(tmp_path) -> None:
+    """Automated conversation should produce multiple utterance_in/out pairs."""
+    from sovereign_agent._internal.llm_client import ChatMessage
+    from sovereign_agent.session.directory import create_session
+
+    from starter.voice_pipeline.manager_persona import ManagerTurn
+
+    # Stub both personas to avoid real LLM calls.
+    class StubManagerPersona:
+        def __init__(self):
+            self.history: list[ManagerTurn] = []
+            self._turn = 0
+
+        async def respond(self, utterance: str) -> str:
+            self._turn += 1
+            if self._turn == 1:
+                r = "Aye, sounds good. What's the contact number?"
+            elif self._turn == 2:
+                r = "Right, you're all booked in. Cheerio!"
+            else:
+                r = "Goodbye."
+            self.history.append(ManagerTurn(user_utterance=utterance, manager_response=r))
+            return r
+
+    class StubResearcherClient:
+        async def chat(self, *, model, messages, temperature=0.0, max_tokens=200):
+            return ChatMessage(role="assistant", content="It's 12345678. Thanks!")
+
+    sessions_dir = tmp_path / "sessions"
+    sessions_dir.mkdir()
+    session = create_session(scenario="test", sessions_dir=sessions_dir)
+
+    from sovereign_agent.halves import HalfResult
+
+    from starter.handoff_bridge.bridge import BridgeResult
+    from starter.voice_pipeline.run_e2e import run_automated_conversation
+
+    bridge_result = BridgeResult(
+        outcome="completed",
+        rounds=1,
+        final_half_result=HalfResult(
+            success=True,
+            output={
+                "committed": True,
+                "booking": {
+                    "venue_id": "haymarket_tap",
+                    "date": "2026-04-25",
+                    "time": "19:30",
+                    "party_size": 6,
+                    "deposit_gbp": 111,
+                },
+                "booking_reference": "BK-A1B2C3D4",
+            },
+            summary="confirmed",
+            next_action="complete",
+        ),
+        summary="confirmed",
+    )
+
+    await run_automated_conversation(
+        session=session,
+        manager=StubManagerPersona(),
+        researcher_client=StubResearcherClient(),
+        researcher_model="fake",
+        bridge_result=bridge_result,
+        voice=False,
+        max_turns=6,
+    )
+
+    trace_text = session.trace_path.read_text(encoding="utf-8")
+    events = [json.loads(line) for line in trace_text.strip().splitlines()]
+
+    utterance_ins = [e for e in events if e.get("event_type") == "voice.utterance_in"]
+    utterance_outs = [e for e in events if e.get("event_type") == "voice.utterance_out"]
+
+    # Turn 0: researcher's booking request -> manager asks for number
+    # Turn 1: researcher's "12345678" -> manager's "Cheerio!"
+    # Conversation ends because manager said "Cheerio" (goodbye)
+    assert len(utterance_ins) >= 2
+    assert len(utterance_outs) >= 2
+
+    # First utterance should be the booking request
+    assert "Haymarket Tap" in utterance_ins[0]["payload"]["text"]
+
+    # Conversation should have ended naturally (not hit max_turns=6)
+    assert len(utterance_ins) <= 3
