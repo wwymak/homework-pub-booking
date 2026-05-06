@@ -67,3 +67,76 @@ async def test_text_mode_without_initial_utterance_unchanged(tmp_path, monkeypat
 
     assert len(persona.history) == 1
     assert persona.history[0].user_utterance == "hello"
+
+
+def test_format_booking_utterance_includes_all_fields() -> None:
+    """format_booking_utterance should include venue, party, date, time, deposit."""
+    from sovereign_agent.halves import HalfResult
+
+    from starter.handoff_bridge.bridge import BridgeResult
+
+    bridge_result = BridgeResult(
+        outcome="completed",
+        rounds=1,
+        final_half_result=HalfResult(
+            success=True,
+            output={
+                "committed": True,
+                "booking": {
+                    "venue_id": "haymarket_tap",
+                    "date": "2026-04-25",
+                    "time": "19:30",
+                    "party_size": 6,
+                    "deposit_gbp": 111,
+                },
+                "booking_reference": "BK-A1B2C3D4",
+            },
+            summary="confirmed",
+            next_action="complete",
+        ),
+        summary="structured confirmed in round 1",
+    )
+
+    from starter.voice_pipeline.run_e2e import format_booking_utterance
+
+    utterance = format_booking_utterance(bridge_result)
+
+    assert "Haymarket Tap" in utterance or "haymarket_tap" in utterance.lower()
+    assert "6" in utterance
+    assert "2026-04-25" in utterance or "25" in utterance
+    assert "19:30" in utterance
+    assert "111" in utterance
+
+
+def test_format_booking_utterance_handles_deposit_required_gbp_alias() -> None:
+    """The bridge may pass deposit as deposit_required_gbp instead of deposit_gbp."""
+    from sovereign_agent.halves import HalfResult
+
+    from starter.handoff_bridge.bridge import BridgeResult
+
+    bridge_result = BridgeResult(
+        outcome="completed",
+        rounds=1,
+        final_half_result=HalfResult(
+            success=True,
+            output={
+                "committed": True,
+                "booking": {
+                    "venue_id": "royal_oak",
+                    "date": "2026-04-25",
+                    "time": "19:30",
+                    "party_size": 6,
+                    "deposit_required_gbp": 200,
+                },
+                "booking_reference": "BK-XXXX",
+            },
+            summary="confirmed",
+            next_action="complete",
+        ),
+        summary="confirmed",
+    )
+
+    from starter.voice_pipeline.run_e2e import format_booking_utterance
+
+    utterance = format_booking_utterance(bridge_result)
+    assert "200" in utterance
