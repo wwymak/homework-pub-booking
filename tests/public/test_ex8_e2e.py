@@ -207,7 +207,7 @@ async def test_e2e_scripted_bridge_completes_and_voice_trace_exists(tmp_path, mo
 
     events = [json.loads(line) for line in trace_text.strip().splitlines()]
     utterance_ins = [e for e in events if e.get("event_type") == "voice.utterance_in"]
-    assert len(utterance_ins) >= 1
+    assert len(utterance_ins) >= 2
     assert "Haymarket Tap" in utterance_ins[0]["payload"]["text"]
 
 
@@ -272,11 +272,14 @@ async def test_run_automated_conversation_produces_multi_turn_trace(tmp_path) ->
 
     # Stub both personas to avoid real LLM calls.
     class StubManagerPersona:
-        def __init__(self):
+        """Stub manager with scripted multi-turn responses."""
+
+        def __init__(self) -> None:
             self.history: list[ManagerTurn] = []
-            self._turn = 0
+            self._turn: int = 0
 
         async def respond(self, utterance: str) -> str:
+            """Return scripted manager responses."""
             self._turn += 1
             if self._turn == 1:
                 r = "Aye, sounds good. What's the contact number?"
@@ -288,7 +291,12 @@ async def test_run_automated_conversation_produces_multi_turn_trace(tmp_path) ->
             return r
 
     class StubResearcherClient:
-        async def chat(self, *, model, messages, temperature=0.0, max_tokens=200):
+        """Stub LLM client for the research agent."""
+
+        async def chat(
+            self, *, model: str, messages: list, temperature: float = 0.0, max_tokens: int = 200
+        ) -> ChatMessage:
+            """Return a scripted researcher response."""
             return ChatMessage(role="assistant", content="It's 12345678. Thanks!")
 
     sessions_dir = tmp_path / "sessions"

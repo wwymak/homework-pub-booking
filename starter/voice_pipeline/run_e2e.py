@@ -21,6 +21,7 @@ from pathlib import Path
 from sovereign_agent._internal.llm_client import (
     ChatMessage,
     FakeLLMClient,
+    LLMClient,
     OpenAICompatibleClient,
     ScriptedResponse,
     ToolCall,
@@ -107,8 +108,8 @@ def build_research_agent_prompt(bridge_result: BridgeResult) -> str:
 async def run_automated_conversation(
     *,
     session: Session,
-    manager,
-    researcher_client,
+    manager: ManagerPersona,
+    researcher_client: LLMClient,
     researcher_model: str,
     bridge_result: BridgeResult,
     voice: bool = False,
