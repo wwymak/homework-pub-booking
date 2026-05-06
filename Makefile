@@ -66,6 +66,10 @@ help: ## Structured help — your actual starting point
 	@echo '  ${GREEN}Ex8${RESET}  — Voice pipeline ${DIM}${RESET}'
 	@echo '      ${CYAN}make ex8-text${RESET}            text mode (free, no mic)'
 	@echo '      ${CYAN}make ex8-voice${RESET}           real Speechmatics + Rime (needs setup-voice + mic)'
+	@echo '      ${CYAN}make ex8-e2e${RESET}             scripted research -> text manager conversation'
+	@echo '      ${CYAN}make ex8-e2e-real${RESET}         real LLM + Rasa -> text manager conversation'
+	@echo '      ${CYAN}make ex8-e2e-voice${RESET}        scripted research -> voice manager conversation'
+	@echo '      ${CYAN}make ex8-e2e-full${RESET}         full live pipeline (real LLM + Rasa + voice)'
 	@echo ''
 	@echo '${YELLOW}${BOLD}🔧 OPTIONAL INSTALLS${RESET} ${DIM}(install only when you reach that exercise)${RESET}'
 	@echo '  ${CYAN}make setup-rasa${RESET}              rasa-pro for Ex6 (~400MB, ~2min)'
@@ -323,6 +327,22 @@ ex8-text: ## Run Ex8 (voice pipeline) in TEXT-ONLY mode — no Speechmatics need
 .PHONY: ex8-voice
 ex8-voice: ## Run Ex8 with real STT/TTS — requires SPEECHMATICS_KEY
 	@$(UV) run python -m starter.voice_pipeline.run --voice
+
+.PHONY: ex8-e2e
+ex8-e2e: ## Run Ex8 e2e pipeline (scripted research + text mode)
+	@$(UV) run python -m starter.voice_pipeline.run_e2e
+
+.PHONY: ex8-e2e-real
+ex8-e2e-real: ## Run Ex8 e2e pipeline (real LLM + real Rasa + text mode)
+	@$(UV) run python -m starter.voice_pipeline.run_e2e --real
+
+.PHONY: ex8-e2e-voice
+ex8-e2e-voice: ## Run Ex8 e2e pipeline (scripted research + voice mode)
+	@$(UV) run python -m starter.voice_pipeline.run_e2e --voice
+
+.PHONY: ex8-e2e-full
+ex8-e2e-full: ## Run Ex8 full live pipeline (real LLM + real Rasa + voice)
+	@$(UV) run python -m starter.voice_pipeline.run_e2e --real --voice
 
 .PHONY: ex9
 ex9: ## Validate that your Ex9 reflection answers are populated and well-formed
