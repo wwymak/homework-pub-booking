@@ -36,19 +36,33 @@ SILENCE_TIMEOUT_S = 2.0  # consecutive silence to end an utterance
 # ---------------------------------------------------------------------------
 # Text mode — reference implementation (read this first)
 # ---------------------------------------------------------------------------
-async def run_text_mode(session: Session, persona: ManagerPersona, max_turns: int = 6) -> None:
-    """Conversation via stdin/stdout. Same trace-event shape as voice mode."""
+async def run_text_mode(
+    session: Session,
+    persona: ManagerPersona,
+    max_turns: int = 6,
+    initial_utterance: str | None = None,
+) -> None:
+    """Conversation via stdin/stdout. Same trace-event shape as voice mode.
+
+    When *initial_utterance* is provided, turn 0 uses that string instead
+    of reading from stdin. Subsequent turns read from stdin as normal.
+    """
     print("Text mode. Type a message to Alasdair (pub manager); blank line to quit.")
     print(f"Session: {session.session_id}")
     print("-" * 60)
 
     for turn_idx in range(max_turns):
-        try:
-            user_text = input("you> ").strip()
-        except EOFError:
-            break
-        if not user_text:
-            break
+        # On turn 0, use the injected utterance if provided.
+        if turn_idx == 0 and initial_utterance is not None:
+            user_text = initial_utterance
+            print(f"you> {user_text}")
+        else:
+            try:
+                user_text = input("you> ").strip()
+            except EOFError:
+                break
+            if not user_text:
+                break
 
         session.append_trace_event(
             {
@@ -78,8 +92,18 @@ async def run_text_mode(session: Session, persona: ManagerPersona, max_turns: in
 # ---------------------------------------------------------------------------
 # Voice mode — Speechmatics STT + Speechmatics TTS
 # ---------------------------------------------------------------------------
-async def run_voice_mode(session: Session, persona: ManagerPersona, max_turns: int = 6) -> None:
-    """Voice mode. Real mic capture → Speechmatics STT → manager → Speechmatics TTS."""
+async def run_voice_mode(
+    session: Session,
+    persona: ManagerPersona,
+    max_turns: int = 6,
+    initial_utterance: str | None = None,
+) -> None:
+    """Voice mode. Real mic capture -> Speechmatics STT -> manager -> Speechmatics TTS.
+
+    When *initial_utterance* is provided, turn 0 uses that string instead
+    of capturing from the mic. The utterance is also spoken via TTS before
+    being sent to the persona.
+    """
 
     # ── preflight: keys + deps ─────────────────────────────────────
     speechmatics_key = os.environ.get("SPEECHMATICS_API_KEY", "").strip()
@@ -90,7 +114,9 @@ async def run_voice_mode(session: Session, persona: ManagerPersona, max_turns: i
             "   Add to .env and re-run for real voice.",
             file=sys.stderr,
         )
-        await run_text_mode(session, persona, max_turns=max_turns)
+        await run_text_mode(
+            session, persona, max_turns=max_turns, initial_utterance=initial_utterance
+        )
         return
 
     try:
@@ -103,7 +129,9 @@ async def run_voice_mode(session: Session, persona: ManagerPersona, max_turns: i
             "   Falling back to text mode.",
             file=sys.stderr,
         )
-        await run_text_mode(session, persona, max_turns=max_turns)
+        await run_text_mode(
+            session, persona, max_turns=max_turns, initial_utterance=initial_utterance
+        )
         return
 
     print(f"🎙️  Voice mode. Session: {session.session_id}")
@@ -112,45 +140,56 @@ async def run_voice_mode(session: Session, persona: ManagerPersona, max_turns: i
     print("-" * 60)
 
     for turn_idx in range(max_turns):
-        print(f"\n[turn {turn_idx + 1}] 🎤 listening...")
+        # ── turn 0 with injected utterance: skip mic + STT ─────────
+        if turn_idx == 0 and initial_utterance is not None:
+            user_text = initial_utterance
+            print(f"\n[turn {turn_idx + 1}] (injected) you> {user_text}")
 
-        # ── capture audio ──────────────────────────────────────────
-        try:
-            audio_bytes = _record_until_silence(sd, session, turn_idx)
-        except Exception as e:  # noqa: BLE001
-            print(f"✗ mic capture failed: {e}", file=sys.stderr)
-            print(
-                "   macOS? Check System Settings → Privacy & Security → Microphone\n"
-                "   and grant your terminal app access, then restart the terminal.",
-                file=sys.stderr,
-            )
-            return
+            # Speak the injected utterance via TTS so the user hears it.
+            try:
+                await _speak_speechmatics(user_text, speechmatics_key, sd)
+            except Exception as e:  # noqa: BLE001
+                print(f"   ⚠ TTS for initial utterance failed: {e} (continuing)", file=sys.stderr)
+        else:
+            print(f"\n[turn {turn_idx + 1}] 🎤 listening...")
 
-        if not audio_bytes:
-            print("   (silence detected; ending conversation)")
-            break
+            # ── capture audio ──────────────────────────────────────────
+            try:
+                audio_bytes = _record_until_silence(sd, session, turn_idx)
+            except Exception as e:  # noqa: BLE001
+                print(f"✗ mic capture failed: {e}", file=sys.stderr)
+                print(
+                    "   macOS? Check System Settings → Privacy & Security → Microphone\n"
+                    "   and grant your terminal app access, then restart the terminal.",
+                    file=sys.stderr,
+                )
+                return
 
-        # ── transcribe via Speechmatics ────────────────────────────
-        try:
-            user_text = await _transcribe_speechmatics(
-                audio_bytes,
-                speechmatics_key,
-            )
-        except Exception as e:  # noqa: BLE001
-            print(f"✗ STT failed: {e}", file=sys.stderr)
-            print(
-                "   Check SPEECHMATICS_API_KEY (make educator-diagnostics).\n"
-                "   Free-tier has a monthly cap; 403 usually means exhausted.",
-                file=sys.stderr,
-            )
-            return
+            if not audio_bytes:
+                print("   (silence detected; ending conversation)")
+                break
 
-        user_text = user_text.strip()
-        if not user_text:
-            print("   (no transcript; ending conversation)")
-            break
+            # ── transcribe via Speechmatics ────────────────────────────
+            try:
+                user_text = await _transcribe_speechmatics(
+                    audio_bytes,
+                    speechmatics_key,
+                )
+            except Exception as e:  # noqa: BLE001
+                print(f"✗ STT failed: {e}", file=sys.stderr)
+                print(
+                    "   Check SPEECHMATICS_API_KEY (make educator-diagnostics).\n"
+                    "   Free-tier has a monthly cap; 403 usually means exhausted.",
+                    file=sys.stderr,
+                )
+                return
 
-        print(f"   you> {user_text}")
+            user_text = user_text.strip()
+            if not user_text:
+                print("   (no transcript; ending conversation)")
+                break
+
+            print(f"   you> {user_text}")
         session.append_trace_event(
             {
                 "event_type": "voice.utterance_in",
