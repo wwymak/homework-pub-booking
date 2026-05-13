@@ -1,0 +1,44 @@
+[
+  {
+    "id": "sg_1",
+    "description": "Reduce party size to a smaller value than previously attempted to meet venue capacity constraints.",
+    "success_criterion": "Party size is updated to a smaller value than the previous proposal.",
+    "estimated_tool_calls": 0,
+    "depends_on": [],
+    "assigned_half": "loop",
+    "status": "pending"
+  },
+  {
+    "id": "sg_2",
+    "description": "Search for venues that can accommodate the reduced party size.",
+    "success_criterion": "Venue search returns at least one valid venue for the new party size.",
+    "estimated_tool_calls": 1,
+    "depends_on": [
+      "sg_1"
+    ],
+    "assigned_half": "loop",
+    "status": "pending"
+  },
+  {
+    "id": "sg_3",
+    "description": "Calculate the total cost for the selected venue and party size.",
+    "success_criterion": "Cost calculation returns a valid amount for the selected venue.",
+    "estimated_tool_calls": 1,
+    "depends_on": [
+      "sg_2"
+    ],
+    "assigned_half": "loop",
+    "status": "pending"
+  },
+  {
+    "id": "sg_4",
+    "description": "Hand off the corrected booking data to the structured half for final processing.",
+    "success_criterion": "Handoff_to_structured tool is successfully executed with adjusted party size and venue details.",
+    "estimated_tool_calls": 1,
+    "depends_on": [
+      "sg_3"
+    ],
+    "assigned_half": "structured",
+    "status": "pending"
+  }
+]
