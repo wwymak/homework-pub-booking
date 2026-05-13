@@ -1,0 +1,1 @@
+{"event_type": "planner.called", "actor": "default", "timestamp": "2026-05-13T16:16:12.544882+00:00", "payload": {"task_preview": "# Session sess_51dfce6ae6c7\n\n**Scenario:** edinburgh-research\n**Created:** 2026-05-13T16:16:12.109009+00:00\n\n## Your task\n\n(The loop half reads this file on every turn. The initial task description\nha"}}

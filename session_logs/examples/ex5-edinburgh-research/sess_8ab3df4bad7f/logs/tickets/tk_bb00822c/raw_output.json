@@ -1,0 +1,22 @@
+[
+  {
+    "id": "sg_1",
+    "description": "venue_search(near='Haymarket', party_size=6, budget_max_gbp=800); get_weather(city='edinburgh', date='2026-04-25'); calculate_cost(venue_id=use the venue id returned by venue_search, party_size=6, duration_hours=3, catering_tier='bar_snacks'); generate_flyer(event_details={\"venue_name\": \"venue_search_result.name\", \"address\": \"venue_search_result.address\", \"weather\": \"get_weather_result.condition\", \"total_cost\": \"calculate_cost_result.total\", \"date\": \"2026-04-25\", \"time\": \"19:30\", \"party_size\": 6})",
+    "success_criterion": "workspace/flyer.html exists",
+    "estimated_tool_calls": 4,
+    "depends_on": [],
+    "assigned_half": "loop",
+    "status": "pending"
+  },
+  {
+    "id": "sg_2",
+    "description": "complete_task(result={'flyer': 'workspace/flyer.html'})",
+    "success_criterion": "session marked as complete",
+    "estimated_tool_calls": 1,
+    "depends_on": [
+      "sg_1"
+    ],
+    "assigned_half": "loop",
+    "status": "pending"
+  }
+]

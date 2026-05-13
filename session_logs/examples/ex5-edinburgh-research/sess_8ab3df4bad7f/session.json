@@ -1,0 +1,42 @@
+{
+  "session_id": "sess_8ab3df4bad7f",
+  "version": 1,
+  "created_at": "2026-05-13T16:19:28.147746+00:00",
+  "updated_at": "2026-05-13T16:20:06.031518+00:00",
+  "scenario": "edinburgh-research",
+  "state": "executing",
+  "user_id": null,
+  "current_half": "loop",
+  "planner": {
+    "subgoals": [
+      {
+        "id": "sg_1",
+        "description": "venue_search(near='Haymarket', party_size=6, budget_max_gbp=800); get_weather(city='edinburgh', date='2026-04-25'); calculate_cost(venue_id=use the venue id returned by venue_search, party_size=6, duration_hours=3, catering_tier='bar_snacks'); generate_flyer(event_details={\"venue_name\": \"venue_search_result.name\", \"address\": \"venue_search_result.address\", \"weather\": \"get_weather_result.condition\", \"total_cost\": \"calculate_cost_result.total\", \"date\": \"2026-04-25\", \"time\": \"19:30\", \"party_size\": 6})",
+        "success_criterion": "workspace/flyer.html exists",
+        "estimated_tool_calls": 4,
+        "depends_on": [],
+        "assigned_half": "loop",
+        "status": "pending"
+      },
+      {
+        "id": "sg_2",
+        "description": "complete_task(result={'flyer': 'workspace/flyer.html'})",
+        "success_criterion": "session marked as complete",
+        "estimated_tool_calls": 1,
+        "depends_on": [
+          "sg_1"
+        ],
+        "assigned_half": "loop",
+        "status": "pending"
+      }
+    ]
+  },
+  "executor": {},
+  "structured": {},
+  "memory": {},
+  "handoff_history": [],
+  "bare_mode": false,
+  "config_overrides": {},
+  "result": null,
+  "resumed_from": null
+}

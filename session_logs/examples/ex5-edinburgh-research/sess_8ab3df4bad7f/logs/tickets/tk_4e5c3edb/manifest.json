@@ -1,0 +1,20 @@
+{
+  "ticket_id": "tk_4e5c3edb",
+  "operation": "executor.run_subgoal/sg_2",
+  "started_at": "2026-05-13T16:21:26.815661+00:00",
+  "completed_at": "2026-05-13T16:21:44.965538+00:00",
+  "duration_ms": 18149,
+  "outputs": [
+    {
+      "path": "/Users/wendy.mak/work/experiments/ai-perf-course-hw-pub-booking/session_logs/examples/ex5-edinburgh-research/sess_8ab3df4bad7f/logs/tickets/tk_4e5c3edb/raw_output.json",
+      "sha256": "f56737163384cc6bfb4d9eb617af9db5850a1997202d0832ac2b9b357717313e",
+      "size_bytes": 1904,
+      "content_type": "application/json"
+    }
+  ],
+  "metrics": {
+    "tool_calls": 1,
+    "turns_used": 2,
+    "handoff_requested": false
+  }
+}
