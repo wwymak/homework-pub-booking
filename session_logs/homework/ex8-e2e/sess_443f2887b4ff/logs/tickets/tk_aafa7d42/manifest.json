@@ -1,0 +1,20 @@
+{
+  "ticket_id": "tk_aafa7d42",
+  "operation": "executor.run_subgoal/sg_1",
+  "started_at": "2026-05-13T17:47:36.690096+00:00",
+  "completed_at": "2026-05-13T17:48:12.233989+00:00",
+  "duration_ms": 35543,
+  "outputs": [
+    {
+      "path": "/Users/wendy.mak/work/experiments/ai-perf-course-hw-pub-booking/session_logs/homework/ex8-e2e/sess_443f2887b4ff/logs/tickets/tk_aafa7d42/raw_output.json",
+      "sha256": "2154824a24d6a8ecfe4fb41e1c064cee99090adc33f376ff5a8120483ae458a1",
+      "size_bytes": 1705,
+      "content_type": "application/json"
+    }
+  ],
+  "metrics": {
+    "tool_calls": 3,
+    "turns_used": 3,
+    "handoff_requested": true
+  }
+}

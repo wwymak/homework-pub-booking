@@ -6,6 +6,19 @@
 PY := python3
 UV := uv
 
+# Detect which optional extras are already installed so that `uv sync`
+# calls preserve them. Without this, `uv sync --extra voice` would
+# uninstall rasa packages and vice versa.
+_HAS_RASA  := $(shell $(UV) run --no-sync python -c "import rasa" 2>/dev/null && echo yes)
+_HAS_VOICE := $(shell $(UV) run --no-sync python -c "import speechmatics" 2>/dev/null && echo yes)
+_EXTRA_FLAGS :=
+ifeq ($(_HAS_RASA),yes)
+    _EXTRA_FLAGS += --extra rasa
+endif
+ifeq ($(_HAS_VOICE),yes)
+    _EXTRA_FLAGS += --extra voice
+endif
+
 # Load .env into Make's own environment and export every variable to
 # child processes. This is how Rasa/sovereign-agent/subprocess.run all
 # end up seeing RASA_PRO_LICENSE, NEBIUS_KEY, etc. without extra Python
@@ -120,7 +133,7 @@ setup: ## Install Python 3.12, deps, and create .env from the template
 	  echo "  Install from https://astral.sh/uv or run: pip install uv"; \
 	  exit 1; \
 	}
-	@$(UV) sync --all-groups
+	@$(UV) sync --all-groups $(_EXTRA_FLAGS)
 	@if [ -f .env ]; then \
 	  echo "✓ .env already exists (not overwriting)."; \
 	elif [ -f .env.example ]; then \
@@ -210,14 +223,14 @@ endef
 setup-rasa: ## Install rasa-pro + deps (needed for Ex6 tier 2 and 3)
 	@echo "▶ Installing rasa-pro and related deps into .venv..."
 	@echo "   This is a one-time ~1-2 minute install."
-	@$(UV) sync --extra rasa
+	@$(UV) sync --extra rasa $(_EXTRA_FLAGS)
 	@echo "✓ rasa-pro installed. You can now run: make rasa-actions / make rasa-serve"
 
 .PHONY: setup-voice
 setup-voice: ## Install speechmatics + rime TTS + mic deps (needed for Ex8 voice mode)
 	@echo "▶ Installing voice deps (speechmatics, sounddevice, pydub)..."
 	@echo "   Requires portaudio. On macOS: brew install portaudio"
-	@$(UV) sync --extra voice
+	@$(UV) sync --extra voice $(_EXTRA_FLAGS)
 	@echo ""
 	@echo "✓ voice deps installed. For Ex8 voice mode you still need:"
 	@echo "    - SPEECHMATICS_KEY + RIME_API_KEY in .env"
