@@ -1,0 +1,64 @@
+{
+  "session_id": "sess_cdbacd69eaab",
+  "version": 1,
+  "created_at": "2026-05-06T13:57:50.111390+00:00",
+  "updated_at": "2026-05-06T13:58:28.292300+00:00",
+  "scenario": "ex8-e2e-pipeline",
+  "state": "completed",
+  "user_id": null,
+  "current_half": "loop",
+  "planner": {
+    "subgoals": [
+      {
+        "id": "sg_1",
+        "description": "Search for available venues near Haymarket accommodating 6 people on 2026-04-25 at 19:30",
+        "success_criterion": "List of available venues is retrieved from the booking system",
+        "estimated_tool_calls": 1,
+        "depends_on": [],
+        "assigned_half": "loop",
+        "status": "pending"
+      },
+      {
+        "id": "sg_2",
+        "description": "Book the first available venue from the search results",
+        "success_criterion": "Booking confirmation is received with a reservation ID",
+        "estimated_tool_calls": 1,
+        "depends_on": [
+          "sg_1"
+        ],
+        "assigned_half": "loop",
+        "status": "pending"
+      }
+    ]
+  },
+  "executor": {},
+  "structured": {},
+  "memory": {},
+  "handoff_history": [],
+  "bare_mode": false,
+  "config_overrides": {},
+  "result": {
+    "committed": true,
+    "booking": {
+      "venue_id": "haymarket_tap",
+      "date": "2026-04-25",
+      "time": "19:30",
+      "party_size": 6,
+      "deposit_gbp": 111,
+      "duration_hours": 3,
+      "catering_tier": "bar_snacks"
+    },
+    "booking_reference": "BK-7D401E9E",
+    "rasa_response": [
+      {
+        "recipient_id": "homework-185d7d73",
+        "text": "Booking confirmed. Reference: BK-7D401E9E."
+      },
+      {
+        "recipient_id": "homework-185d7d73",
+        "text": "Is there anything else I can help you with?"
+      }
+    ]
+  },
+  "resumed_from": null
+}

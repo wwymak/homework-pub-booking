@@ -1,0 +1,20 @@
+{
+  "ticket_id": "tk_7636b51e",
+  "operation": "executor.run_subgoal/sg_2",
+  "started_at": "2026-05-03T10:32:03.091156+00:00",
+  "completed_at": "2026-05-03T10:32:23.111148+00:00",
+  "duration_ms": 20019,
+  "outputs": [
+    {
+      "path": "/Users/wendy.mak/Library/Application Support/sovereign-agent/examples/ex5-edinburgh-research/sess_3c28e30c4cd5/logs/tickets/tk_7636b51e/raw_output.json",
+      "sha256": "d3a3699b011ab00eda36a7bf99725c941804c96aad2518190721b1f130b27dd5",
+      "size_bytes": 1111,
+      "content_type": "application/json"
+    }
+  ],
+  "metrics": {
+    "tool_calls": 1,
+    "turns_used": 2,
+    "handoff_requested": false
+  }
+}

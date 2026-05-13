@@ -1,0 +1,42 @@
+{
+  "session_id": "sess_3c28e30c4cd5",
+  "version": 1,
+  "created_at": "2026-05-03T10:30:24.999107+00:00",
+  "updated_at": "2026-05-03T10:31:01.123656+00:00",
+  "scenario": "edinburgh-research",
+  "state": "executing",
+  "user_id": null,
+  "current_half": "loop",
+  "planner": {
+    "subgoals": [
+      {
+        "id": "sg_1",
+        "description": "venue_search(near='Haymarket', party_size=6, budget_max_gbp=800); get_weather(city='edinburgh', date='2026-04-25'); calculate_cost(venue_id='use the venue id returned by venue_search', party_size=6, duration_hours=3, catering_tier='bar_snacks'); generate_flyer(event_details={\"venue_name\": \"use the venue name from venue_search\", \"address\": \"use the venue address from venue_search\", \"date\": \"2026-04-25\", \"time\": \"19:30\", \"weather\": \"use the weather from get_weather\", \"total_cost\": \"use the total_cost from calculate_cost\", \"party_size\": 6})",
+        "success_criterion": "All tools executed successfully and generate_flyer wrote to workspace/flyer.html",
+        "estimated_tool_calls": 4,
+        "depends_on": [],
+        "assigned_half": "loop",
+        "status": "pending"
+      },
+      {
+        "id": "sg_2",
+        "description": "complete_task(result={'flyer': 'workspace/flyer.html'})",
+        "success_criterion": "complete_task called with result containing 'flyer' key",
+        "estimated_tool_calls": 1,
+        "depends_on": [
+          "sg_1"
+        ],
+        "assigned_half": "loop",
+        "status": "pending"
+      }
+    ]
+  },
+  "executor": {},
+  "structured": {},
+  "memory": {},
+  "handoff_history": [],
+  "bare_mode": false,
+  "config_overrides": {},
+  "result": null,
+  "resumed_from": null
+}

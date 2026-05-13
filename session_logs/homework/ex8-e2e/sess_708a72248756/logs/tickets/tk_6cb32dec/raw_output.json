@@ -1,0 +1,59 @@
+{
+  "subgoal_id": "sg_1",
+  "success": true,
+  "final_answer": "(handoff requested)",
+  "tool_calls_made": [
+    {
+      "name": "venue_search",
+      "arguments": {
+        "near": "Haymarket",
+        "party_size": 6
+      },
+      "success": true,
+      "summary": "venue_search(Haymarket, party=6): 1 result(s)",
+      "requires_human_approval": false
+    },
+    {
+      "name": "calculate_cost",
+      "arguments": {
+        "venue_id": "haymarket_tap",
+        "party_size": 6,
+        "duration_hours": 3,
+        "catering_tier": "bar_snacks"
+      },
+      "success": true,
+      "summary": "calculate_cost(haymarket_tap, 6): total \u00a3556, deposit \u00a3111",
+      "requires_human_approval": false
+    },
+    {
+      "name": "handoff_to_structured",
+      "arguments": {
+        "reason": "Proceed with booking confirmation",
+        "context": "Venue found and cost calculated for 6 people at Haymarket Tap on 2026-04-25",
+        "data": {
+          "venue_id": "haymarket_tap",
+          "date": "2026-04-25",
+          "time": "19:30",
+          "party_size": 6,
+          "deposit": 111
+        }
+      },
+      "success": true,
+      "summary": "handoff to structured half: Proceed with booking confirmation",
+      "requires_human_approval": false
+    }
+  ],
+  "turns_used": 3,
+  "handoff_requested": true,
+  "handoff_payload": {
+    "reason": "Proceed with booking confirmation",
+    "context": "Venue found and cost calculated for 6 people at Haymarket Tap on 2026-04-25",
+    "data": {
+      "venue_id": "haymarket_tap",
+      "date": "2026-04-25",
+      "time": "19:30",
+      "party_size": 6,
+      "deposit": 111
+    }
+  }
+}

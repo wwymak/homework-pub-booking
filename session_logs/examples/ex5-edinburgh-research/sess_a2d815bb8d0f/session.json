@@ -1,0 +1,53 @@
+{
+  "session_id": "sess_a2d815bb8d0f",
+  "version": 1,
+  "created_at": "2026-04-29T09:20:20.007158+00:00",
+  "updated_at": "2026-04-29T09:20:53.759353+00:00",
+  "scenario": "edinburgh-research",
+  "state": "executing",
+  "user_id": null,
+  "current_half": "loop",
+  "planner": {
+    "subgoals": [
+      {
+        "id": "sg_1",
+        "description": "search_venues(location='Edinburgh')",
+        "success_criterion": "returns a non-empty list of venues in Edinburgh",
+        "estimated_tool_calls": 1,
+        "depends_on": [],
+        "assigned_half": "loop",
+        "status": "pending"
+      },
+      {
+        "id": "sg_2",
+        "description": "get_venue_details(venue_id=sg_1.result[0].id)",
+        "success_criterion": "returns detailed venue information",
+        "estimated_tool_calls": 1,
+        "depends_on": [
+          "sg_1"
+        ],
+        "assigned_half": "loop",
+        "status": "pending"
+      },
+      {
+        "id": "sg_3",
+        "description": "write_flyer(venue_name=sg_2.result.name, address=sg_2.result.address, description=sg_2.result.description, event_type='general')",
+        "success_criterion": "flyer content is generated successfully",
+        "estimated_tool_calls": 1,
+        "depends_on": [
+          "sg_2"
+        ],
+        "assigned_half": "loop",
+        "status": "pending"
+      }
+    ]
+  },
+  "executor": {},
+  "structured": {},
+  "memory": {},
+  "handoff_history": [],
+  "bare_mode": false,
+  "config_overrides": {},
+  "result": null,
+  "resumed_from": null
+}

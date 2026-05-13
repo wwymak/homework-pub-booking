@@ -1,0 +1,90 @@
+{
+  "subgoal_id": "sg_1",
+  "success": false,
+  "final_answer": "(max_turns=8 exhausted without final answer)",
+  "tool_calls_made": [
+    {
+      "name": "venue_search",
+      "arguments": {
+        "near": "Edinburgh",
+        "party_size": 1
+      },
+      "success": true,
+      "summary": "venue_search(Edinburgh, party=1): 0 result(s)",
+      "requires_human_approval": false
+    },
+    {
+      "name": "venue_search",
+      "arguments": {
+        "near": "Edinburgh",
+        "party_size": 5
+      },
+      "success": true,
+      "summary": "venue_search(Edinburgh, party=5): 0 result(s)",
+      "requires_human_approval": false
+    },
+    {
+      "name": "venue_search",
+      "arguments": {
+        "near": "Edinburgh",
+        "party_size": 10
+      },
+      "success": true,
+      "summary": "venue_search(Edinburgh, party=10): 0 result(s)",
+      "requires_human_approval": false
+    },
+    {
+      "name": "venue_search",
+      "arguments": {
+        "near": "Edinburgh",
+        "party_size": 2
+      },
+      "success": true,
+      "summary": "venue_search(Edinburgh, party=2): 0 result(s)",
+      "requires_human_approval": false
+    },
+    {
+      "name": "venue_search",
+      "arguments": {
+        "near": "Edinburgh",
+        "party_size": 3
+      },
+      "success": true,
+      "summary": "venue_search(Edinburgh, party=3): 0 result(s)",
+      "requires_human_approval": false
+    },
+    {
+      "name": "venue_search",
+      "arguments": {
+        "near": "Edinburgh",
+        "party_size": 4
+      },
+      "success": true,
+      "summary": "venue_search(Edinburgh, party=4): 0 result(s)",
+      "requires_human_approval": false
+    },
+    {
+      "name": "venue_search",
+      "arguments": {
+        "near": "Edinburgh",
+        "party_size": 6
+      },
+      "success": true,
+      "summary": "venue_search(Edinburgh, party=6): 0 result(s)",
+      "requires_human_approval": false
+    },
+    {
+      "name": "venue_search",
+      "arguments": {
+        "near": "Edinburgh",
+        "party_size": 7
+      },
+      "success": true,
+      "summary": "venue_search(Edinburgh, party=7): 0 result(s)",
+      "requires_human_approval": false
+    }
+  ],
+  "turns_used": 8,
+  "handoff_requested": false,
+  "handoff_payload": null
+}

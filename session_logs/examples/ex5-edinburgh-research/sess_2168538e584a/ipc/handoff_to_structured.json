@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "from_half": "loop",
+  "to_half": "structured",
+  "written_at": "2026-04-28T19:52:39.854815+00:00",
+  "session_id": "sess_2168538e584a",
+  "reason": "Venue search returned no results despite multiple parameter adjustments. Need human input to resolve ambiguity in venue criteria.",
+  "context": "Tried 7 different venue_search combinations with varying areas (Edinburgh City Center, Old Town, Grassmarket, Castle, Edinburgh) and party sizes (5-50) but all returned 0 results. Likely missing specific venue requirements or facing data limitations.",
+  "data": {
+    "last_search_params": {
+      "near": "Edinburgh",
+      "party_size": 5,
+      "budget_max_gbp": 500
+    }
+  },
+  "return_instructions": ""
+}

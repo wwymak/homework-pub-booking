@@ -1,0 +1,60 @@
+{
+  "subgoal_id": "sg_1",
+  "success": true,
+  "final_answer": "(handoff requested)",
+  "tool_calls_made": [
+    {
+      "name": "venue_search",
+      "arguments": {
+        "near": "Haymarket",
+        "party_size": 6,
+        "budget_max_gbp": 1000
+      },
+      "success": true,
+      "summary": "venue_search(Haymarket, party=6): 1 result(s)",
+      "requires_human_approval": false
+    },
+    {
+      "name": "calculate_cost",
+      "arguments": {
+        "venue_id": "haymarket_tap",
+        "party_size": 6,
+        "duration_hours": 3,
+        "catering_tier": "bar_snacks"
+      },
+      "success": true,
+      "summary": "calculate_cost(haymarket_tap, 6): total \u00a3556, deposit \u00a3111",
+      "requires_human_approval": false
+    },
+    {
+      "name": "handoff_to_structured",
+      "arguments": {
+        "reason": "Confirm booking details with structured agent",
+        "context": "User requested venue booking for 6 people on 2026-04-25 at 19:30 near Haymarket",
+        "data": {
+          "venue_id": "haymarket_tap",
+          "date": "2026-04-25",
+          "time": "19:30",
+          "party_size": 6,
+          "deposit": 111
+        }
+      },
+      "success": true,
+      "summary": "handoff to structured half: Confirm booking details with structured agent",
+      "requires_human_approval": false
+    }
+  ],
+  "turns_used": 3,
+  "handoff_requested": true,
+  "handoff_payload": {
+    "reason": "Confirm booking details with structured agent",
+    "context": "User requested venue booking for 6 people on 2026-04-25 at 19:30 near Haymarket",
+    "data": {
+      "venue_id": "haymarket_tap",
+      "date": "2026-04-25",
+      "time": "19:30",
+      "party_size": 6,
+      "deposit": 111
+    }
+  }
+}

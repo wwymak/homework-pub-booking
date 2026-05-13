@@ -1,0 +1,21 @@
+{
+  "ticket_id": "tk_2ce26b3d",
+  "operation": "planner.plan",
+  "started_at": "2026-05-06T13:33:11.350917+00:00",
+  "completed_at": "2026-05-06T13:33:24.038344+00:00",
+  "duration_ms": 12687,
+  "outputs": [
+    {
+      "path": "/Users/wendy.mak/work/experiments/ai-perf-course-hw-pub-booking/session_logs/homework/ex8-e2e/sess_708a72248756/logs/tickets/tk_2ce26b3d/raw_output.json",
+      "sha256": "b5ba23e19c36a1f1ff51998e91181ca3ae1f79e0cf7120f803f2a454c7d0b458",
+      "size_bytes": 681,
+      "content_type": "application/json"
+    }
+  ],
+  "metrics": {
+    "num_subgoals": 2,
+    "llm_tokens_in": 286,
+    "llm_tokens_out": 1836,
+    "llm_model": "Qwen/Qwen3-Next-80B-A3B-Thinking"
+  }
+}

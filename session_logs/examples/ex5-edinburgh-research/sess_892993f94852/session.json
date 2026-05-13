@@ -1,0 +1,74 @@
+{
+  "session_id": "sess_892993f94852",
+  "version": 1,
+  "created_at": "2026-04-29T09:47:31.834940+00:00",
+  "updated_at": "2026-04-29T09:47:59.542517+00:00",
+  "scenario": "edinburgh-research",
+  "state": "executing",
+  "user_id": null,
+  "current_half": "loop",
+  "planner": {
+    "subgoals": [
+      {
+        "id": "sg_1",
+        "description": "call venue_search(near='Haymarket', party_size=6, budget_max_gbp=800)",
+        "success_criterion": "returns a list of venues matching search parameters",
+        "estimated_tool_calls": 1,
+        "depends_on": [],
+        "assigned_half": "loop",
+        "status": "pending"
+      },
+      {
+        "id": "sg_2",
+        "description": "call get_weather(city='edinburgh', date='2026-04-25')",
+        "success_criterion": "returns weather data for Edinburgh on 2026-04-25",
+        "estimated_tool_calls": 1,
+        "depends_on": [],
+        "assigned_half": "loop",
+        "status": "pending"
+      },
+      {
+        "id": "sg_3",
+        "description": "call calculate_cost(venue_id=<chosen pub's id>, party_size=6, duration_hours=3, catering_tier='bar_snacks')",
+        "success_criterion": "returns cost and deposit details",
+        "estimated_tool_calls": 1,
+        "depends_on": [
+          "sg_1"
+        ],
+        "assigned_half": "loop",
+        "status": "pending"
+      },
+      {
+        "id": "sg_4",
+        "description": "call generate_flyer(event_details={...})",
+        "success_criterion": "workspace/flyer.html is created",
+        "estimated_tool_calls": 1,
+        "depends_on": [
+          "sg_2",
+          "sg_3"
+        ],
+        "assigned_half": "loop",
+        "status": "pending"
+      },
+      {
+        "id": "sg_5",
+        "description": "call complete_task(result={'flyer': 'workspace/flyer.html', ...})",
+        "success_criterion": "session marked as complete",
+        "estimated_tool_calls": 1,
+        "depends_on": [
+          "sg_4"
+        ],
+        "assigned_half": "loop",
+        "status": "pending"
+      }
+    ]
+  },
+  "executor": {},
+  "structured": {},
+  "memory": {},
+  "handoff_history": [],
+  "bare_mode": false,
+  "config_overrides": {},
+  "result": null,
+  "resumed_from": null
+}
